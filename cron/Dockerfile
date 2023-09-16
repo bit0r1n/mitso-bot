@@ -10,4 +10,4 @@ RUN chmod 0644 /etc/cron.d/crontab
 
 RUN /usr/bin/crontab /etc/cron.d/crontab
 
-ENTRYPOINT [ "cron", "-f" ]
+ENTRYPOINT [ "crond", "-f", "-l", "8" ]
