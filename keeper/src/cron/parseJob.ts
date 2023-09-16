@@ -66,12 +66,23 @@ for (const group of groups) {
 
 groups.splice(0, groups.length)
 
-console.debug('Saving %d teachers', [...teacherSet].length)
-
-const teachersDocuments = [...teacherSet].map(name => new Teacher({ name }))
-await Teacher.insertMany(teachersDocuments)
+const parsedTeachers = [...teacherSet]
+const teachers = await Teacher.find()
 
 teacherSet.clear()
-teachersDocuments.splice(0, teachersDocuments.length)
+
+const teachersToSave = parsedTeachers.filter(name => !teachers.find(t => t.name === name))
+
+if (teachersToSave.length) {
+  console.debug('Saving %d teachers', teachersToSave.length)
+
+  const teachersDocuments = teachersToSave.map(name => new Teacher({ name }))
+  await Teacher.insertMany(teachersDocuments)
+  teachersDocuments.splice(0, teachersDocuments.length)
+}
+
+parsedTeachers.splice(0, parsedTeachers.length)
+teachers.splice(0, teachers.length)
+teachersToSave.splice(0, teachersToSave.length)
 
 console.debug('Done');

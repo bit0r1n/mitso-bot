@@ -1,7 +1,7 @@
 import * as mongoose from 'mongoose'
 
 const teacherSchema = new mongoose.Schema({
-  name: { type: String, required: true }
+  name: { type: String, required: true, unique: true }
 })
 
 export type Teacher = mongoose.InferSchemaType<typeof teacherSchema>
