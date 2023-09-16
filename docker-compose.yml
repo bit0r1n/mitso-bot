@@ -1,0 +1,34 @@
+version: "3.9"
+services:
+  mongo:
+    image: mongo:latest
+    restart: always
+  parser:
+    build: ./parser
+    restart: always
+    healthcheck:
+      test: curl --fail http://parser:3000 || exit 1
+      interval: 5s
+      timeout: 10s
+      retries: 10
+  keeper:
+    build: ./keeper
+    restart: always
+    environment:
+      - NODE_ENV=production
+      - MONGODB_URL=mongodb://mongo:27017
+    depends_on:
+      - mongo
+      - parser
+  bot:
+    build: ./bot
+    restart: always
+    environment:
+      - BOT_TOKEN=${BOT_TOKEN}
+      - MONGO_URL=mongodb://mongo:27017
+      - PARSER_URL=http://parser:3000
+      - KEEPER_URL=http://keeper:3000
+  cron:
+    build: ./cron
+    depends_on:
+      - keeper

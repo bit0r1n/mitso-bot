@@ -1,0 +1,1 @@
+0 1 * * * /usr/bin/curl http://keeper:3000/parse_job

@@ -1,0 +1,5 @@
+switch("threads", "on")
+switch("d", "ssl")
+switch("d", "release")
+switch("mm", "orc")
+switch("d", "useStdLib")
