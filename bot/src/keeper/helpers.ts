@@ -129,8 +129,8 @@ export const lessonsToMessage = (lessons: Lesson[], groups?: Group[]): string =>
   return days.join('\n\n')
 }
 
-export const weekToHuman = (weekStart: Date): string => {
-  const diff = weekStart.getTime() - getWeekStart().getTime()
-  const weeks = Math.floor(diff / (1000 * 60 ** 2 * 24 * 7))
-  return weeks === 0 ? 'Текущая неделя' : `${weeks + 1} неделя`
+export const weekToHuman = (weekStart: Date, from = getWeekStart()): string => {
+  const diff = weekStart.getTime() - from.getTime()
+  const weekDiff = Math.ceil(diff / (7 * 24 * 60 ** 2 * 1e3))
+  return weekDiff === 0 ? 'Текущая неделя' : `${weekDiff + 1} неделя`
 }

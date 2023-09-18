@@ -82,9 +82,8 @@ bot.hears([ 'Сегодня', 'Завтра' ], async (ctx) => {
   todayStart.setHours(0, 0, 0, 0)
 
   const tomorrowStart = new Date()
-  tomorrowStart.setTime(tomorrowStart.getTime() + (3 * 60 ** 2 * 1e3) + extraTime)
+  tomorrowStart.setTime(todayStart.getTime() + (24 * 60 ** 2 * 1e3))
   tomorrowStart.setHours(0, 0, 0, 0)
-  tomorrowStart.setDate(tomorrowStart.getDate() + 1)
 
   const lessons = await keeper.getLessons({
     group: ctx.user.group!.id,
@@ -105,9 +104,14 @@ bot.hears([ 'Сегодня', 'Завтра' ], async (ctx) => {
 bot.hears('Неделя', async (ctx) => {
   if (ctx.user.state !== UserState.MainMenu) return
 
+  const weekStartDate = new Date()
+  weekStartDate.setTime(weekStartDate.getTime() + (3 * 60 ** 2 * 1e3))
+
+  const weekStart = getWeekStart(weekStartDate)
+
   const weeks = await keeper.getWeeks({
     group: ctx.user.group!.id!,
-    from: new Date()
+    from: weekStart
   })
 
   const buttons = batchButtons(
@@ -209,11 +213,13 @@ bot.on(callbackQuery('data'), async (ctx) => {
 
     const weekStart = new Date(weekStartRaw)
     const weekEnd = new Date(weekStartRaw)
-    weekEnd.setDate(weekEnd.getDate() + 7)
+    weekEnd.setTime(weekStart.getTime() + (7 * 24 * 60 ** 2 * 1e3))
+
+    let groupName: string = ctx.user.group!.display!
 
     if (groupId) {
       try {
-        await parser.getGroup(groupId)
+        groupName = (await parser.getGroup(groupId)).display
       } catch (e) {
         await ctx.answerCbQuery()
         await ctx.editMessageText(
@@ -231,7 +237,12 @@ bot.on(callbackQuery('data'), async (ctx) => {
       before: weekEnd
     })
 
-    const target = weekId === '0' ? 'текущую неделю' : `${+weekId + 1} неделю`
+    const currentDate = new Date()
+    currentDate.setTime(currentDate.getTime() + (3 * 60 ** 2 * 1e3))
+    const diff = weekStart.getTime() - currentDate.getTime()
+    const weekDiff = Math.ceil(diff / (7 * 24 * 60 ** 2 * 1e3))
+
+    const target = weekDiff === 0 ? 'текущую неделю' : `${weekDiff + 1} неделю`
 
     if (!lessons.length) {
       await ctx.answerCbQuery()
@@ -241,7 +252,7 @@ bot.on(callbackQuery('data'), async (ctx) => {
 
     await ctx.answerCbQuery()
     await ctx.editMessageText([
-      `Расписание ${ctx.user.group!.display} на ${target}`,
+      `Расписание ${groupName} на ${target}`,
       lessonsToMessage(lessons)
     ].join('\n'))
   } else if (command === 'teacher_week') {
@@ -261,9 +272,13 @@ bot.on(callbackQuery('data'), async (ctx) => {
 
       await ctx.editMessageText('🧄 Напиши инициалы преподавателя или его часть\n\nОбычно они в формате Фамилия И. О.')
     } else {
-      const weekStart = getWeekStart(new Date())
+      const weekStartDate = new Date()
+      weekStartDate.setTime(weekStartDate.getTime() + (3 * 60 ** 2 * 1e3))
+
+      const weekStart = getWeekStart(weekStartDate)
+
       const weekEnd = new Date(weekStart)
-      weekEnd.setDate(weekEnd.getDate() + 7)
+      weekEnd.setTime(weekEnd.getTime() + (7 * 24 * 60 ** 2 * 1e3))
 
       const lessons = await keeper.getLessons({
         teachers: [ teacherName ],
@@ -283,7 +298,7 @@ bot.on(callbackQuery('data'), async (ctx) => {
       const groups = await parser.getGroups()
 
       await ctx.editMessageText([
-        `Распиания на неделю у ${teacherName}`,
+        `Распиание на неделю у ${teacherName}`,
         lessonsToMessage(lessons, groups)
       ].join('\n'))
     }
@@ -296,7 +311,7 @@ bot.on(callbackQuery('data'), async (ctx) => {
       await ctx.user.save()
 
       await ctx.answerCbQuery()
-      await ctx.editMessageReplyMarkup(Markup.inlineKeyboard([[]]).reply_markup)
+      await ctx.editMessageReplyMarkup(Markup.inlineKeyboard([ [] ]).reply_markup)
 
       await ctx.reply('🤨', {
         reply_markup: keyboards[ctx.user.state as UserState].resize().reply_markup
@@ -309,7 +324,7 @@ bot.on(callbackQuery('data'), async (ctx) => {
         group = await parser.getGroup(groupId)
       } catch (e) {
         await ctx.answerCbQuery()
-        await ctx.editMessageReplyMarkup(Markup.inlineKeyboard([[]]).reply_markup)
+        await ctx.editMessageReplyMarkup(Markup.inlineKeyboard([ [] ]).reply_markup)
         await ctx.editMessageText(
           (e as Error).message === 'Group not found'
             ? '😭 Группа не найдена'
@@ -318,9 +333,13 @@ bot.on(callbackQuery('data'), async (ctx) => {
         return
       }
 
-      const weekStart = getWeekStart(new Date())
+      const weekStartDate = new Date()
+      weekStartDate.setTime(weekStartDate.getTime() + (3 * 60 ** 2 * 1e3))
+
+      const weekStart = getWeekStart(weekStartDate)
+
       const weekEnd = new Date(weekStart)
-      weekEnd.setDate(weekEnd.getDate() + 7)
+      weekEnd.setTime(weekEnd.getTime() + (7 * 24 * 60 ** 2 * 1e3))
 
       const lessons = await keeper.getLessons({
         group: groupId,
@@ -336,7 +355,7 @@ bot.on(callbackQuery('data'), async (ctx) => {
     
       await ctx.answerCbQuery()
       await ctx.editMessageText([
-        `Распиания на неделю для ${group.display}`,
+        `Распиание на неделю для ${group.display}`,
         lessonsToMessage(lessons)
       ].join('\n'))
     }

@@ -30,6 +30,10 @@ services:
       - MONGO_URL=mongodb://mongo:27017
       - PARSER_URL=http://parser:3000
       - KEEPER_URL=http://keeper:3000
+    depends_on:
+      - parser
+      - keeper
+      - mongo
   cron:
     build: ./cron
     depends_on:
