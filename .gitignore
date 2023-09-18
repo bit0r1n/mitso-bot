@@ -1,2 +1,5 @@
 .env
+.secrets
+
 data
+act

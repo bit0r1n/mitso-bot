@@ -1,0 +1,28 @@
+on:
+  workflow_dispatch:
+  workflow_call:
+  release:
+    types: [published]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install cloudflared
+        run: |
+          wget -q https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
+          dpkg -i cloudflared-linux-amd64.deb
+      - name: Connect to server
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.DEPLOY_PRIVATE_KEY }}
+          known_hosts: ${{ secrets.KNOWN_HOSTS }}
+          name: id_rsa
+          config: |
+            Host ${{ secrets.DEPLOY_HOST }}
+              User ${{ secrets.DEPLOY_USERNAME }}
+              IdentityFile ~/.ssh/id_rsa
+              ProxyCommand cloudflared access ssh --hostname %h --id ${{ secrets.DEPLOY_AUTH_ID }} --secret ${{ secrets.DEPLOY_AUTH_SECRET }}
+      - name: Deploy bot
+        run: |
+          ssh ${{ secrets.DEPLOY_USERNAME }}@${{ secrets.DEPLOY_HOST }} "cd mitso-bot && git pull && docker compose up -d --build && exit"
