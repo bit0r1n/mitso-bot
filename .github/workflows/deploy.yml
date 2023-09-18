@@ -22,6 +22,7 @@ jobs:
             Host ${{ secrets.DEPLOY_HOST }}
               User ${{ secrets.DEPLOY_USERNAME }}
               IdentityFile ~/.ssh/id_rsa
+              StrictHostKeyChecking=no
               ProxyCommand cloudflared access ssh --hostname %h --id ${{ secrets.DEPLOY_AUTH_ID }} --secret ${{ secrets.DEPLOY_AUTH_SECRET }}
       - name: Deploy bot
         run: |
