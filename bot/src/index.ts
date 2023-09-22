@@ -37,6 +37,8 @@ bot.use(async (ctx, next) => {
 
   ctx.user = user
 
+  if (ctx.user.blacklisted === true) return
+
   return next()
 })
 
