@@ -5,8 +5,8 @@ import { Parser } from './api/Parser'
 import { Teacher } from './schemas/Teacher'
 import { parseJob } from './cron/parseJob'
 
-//                        d   h&m      s->ms
-const parseJobCooldown = 24 * 60 ** 2 * 1e3
+// //                        d   h&m      s->ms
+// const parseJobCooldown = 24 * 60 ** 2 * 1e3
 
 if (!process.env.MONGODB_URL) {
   throw new Error('MONGODB_URL is not set')
@@ -21,7 +21,7 @@ app.get('/', (req, res) => {
 })
 
 let parseJobRunning = false
-let parseJobWaitingStart: number | undefined
+// let parseJobWaitingStart: number | undefined
 
 app.get('/parse_job', async (req, res) => {
   // const cooldown = parseJobWaitingStart

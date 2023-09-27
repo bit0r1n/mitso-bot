@@ -25,8 +25,7 @@ interface DayResponse {
 export class Parser {
   private url: string;
   constructor(options?: ParserApiOptions) {
-    this.url = options?.url ??
-      `http://${process.env.NODE_ENV === 'production' ? 'parser' : 'localhost'}:3000`
+    this.url = options?.url || `http://parser:3000`
   }
 
   async getGroups(): Promise<Group[]> {

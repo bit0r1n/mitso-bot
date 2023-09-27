@@ -2,10 +2,13 @@ FROM oven/bun:latest
 
 WORKDIR /app
 
-COPY package*.json ./
+COPY package.json ./
+COPY bun.lockb ./
 
-RUN bun install
+RUN bun install --frozen-lockfile
 COPY . .
+
+RUN bun run build
 
 EXPOSE 3000
 
