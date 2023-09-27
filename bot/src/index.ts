@@ -116,6 +116,11 @@ bot.hears('Неделя', async (ctx) => {
     from: weekStart
   })
 
+  if (!weeks.length) {
+    await ctx.reply('🌴 Недель с занятиями не нашлось')
+    return
+  }
+
   const buttons = batchButtons(
     weeks.map((week, i) =>
       Markup.button.callback(
