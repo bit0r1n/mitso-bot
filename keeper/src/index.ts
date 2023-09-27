@@ -3,6 +3,7 @@ import * as mongoose from 'mongoose'
 import { Lesson, LessonFilterOptions } from './schemas/Lesson'
 import { Parser } from './api/Parser'
 import { Teacher } from './schemas/Teacher'
+import { parseJob } from './cron/parseJob'
 
 //                        d   h&m      s->ms
 const parseJobCooldown = 24 * 60 ** 2 * 1e3
@@ -43,7 +44,7 @@ app.get('/parse_job', async (req, res) => {
   res.status(202).json({ result: 'Accepted' })
 
   parseJobRunning = true
-  await import('./cron/parseJob')
+  await parseJob()
   // await Bun.sleep(parseJobCooldown)
   parseJobRunning = false
   // parseJobWaitingStart = Date.now()
