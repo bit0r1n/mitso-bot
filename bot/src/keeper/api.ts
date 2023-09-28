@@ -33,12 +33,12 @@ export class Keeper extends BaseApi {
     }
   
     if (options?.teachers) {
-      (Array.isArray(options.teachers) ? options.teachers : [options.teachers])
+      (Array.isArray(options.teachers) ? options.teachers : [ options.teachers ])
         .forEach(teacher => query.append('teachers', teacher))
     }
 
     if (options?.classrooms) {
-      (Array.isArray(options.classrooms) ? options.classrooms : [options.classrooms])
+      (Array.isArray(options.classrooms) ? options.classrooms : [ options.classrooms ])
         .forEach(classroom => query.append('classrooms', classroom))
     }
 

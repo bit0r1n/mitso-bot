@@ -1,5 +1,5 @@
-import { Group } from "../parser/interfaces";
-import { Lesson, LessonGroups, LessonTime, LessonType } from "./interfaces";
+import { Group } from '../parser/interfaces'
+import { Lesson, LessonGroups, LessonTime, LessonType } from './interfaces'
 
 // const plural = (n: number, plurals: string[]) => plurals[(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)]
 
@@ -93,12 +93,12 @@ export const lessonsToMessage = (lessons: Lesson[], groups?: Group[]): string =>
 
       if (groups) {
         // @ts-ignore
-        lesson.groups = [lesson.group]
+        lesson.groups = [ lesson.group ]
         // @ts-ignore
         delete lesson.group
       }
 
-      if (!acc[dayString]) acc[dayString] = [lesson]
+      if (!acc[dayString]) acc[dayString] = [ lesson ]
       else {
         if (!groups) acc[dayString].push(lesson)
         else {
@@ -117,7 +117,7 @@ export const lessonsToMessage = (lessons: Lesson[], groups?: Group[]): string =>
       return acc
   }, {} as Record<string, (Lesson | LessonGroups)[]>)
 
-  const days = Object.entries(daysLessons).map(([dayString, lessons]) => {
+  const days = Object.entries(daysLessons).map(([ dayString, lessons ]) => {
     const day = new Date(dayString)
     // const lines = [ `🥀  ${day.getDate()} ${plural(day.getDate(), monthsPlurals[day.getMonth()])}, ${daysOfWeek[day.getDay()]}` ]
     const lines = [ `🥀 ${new Intl.DateTimeFormat('ru-RU', { weekday: 'long', month: 'long', day: 'numeric' }).format(day)}` ]

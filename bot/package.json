@@ -4,10 +4,15 @@
   "type": "module",
   "scripts": {
     "start": "bun run dist/index.js",
-    "build": "bun build --target=bun src/index.js --outfile=dist/index.js"
+    "build": "bun build --target=bun src/index.js --outfile=dist/index.js",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix"
   },
   "devDependencies": {
-    "bun-types": "latest"
+    "@typescript-eslint/eslint-plugin": "^6.7.3",
+    "@typescript-eslint/parser": "^6.7.3",
+    "bun-types": "latest",
+    "eslint": "^8.50.0"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"

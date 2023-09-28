@@ -1,11 +1,11 @@
-import { InlineKeyboardButton, InlineKeyboardMarkup } from 'telegraf/types'
+import { InlineKeyboardButton } from 'telegraf/types'
 import { UserState } from '../schemas/User'
 import { Markup } from 'telegraf'
 
 export const CallbackIdSplitter = ':'
 
 export const keyboards = {
-  [UserState.AskingGroup]: Markup.keyboard([[]]),
+  [UserState.AskingGroup]: Markup.keyboard([ [] ]),
   [UserState.ChoosingGroup]: Markup.keyboard([ [ Markup.button.text('Отмена') ] ]),
   [UserState.AskingWeekTeacher]: Markup.keyboard([ [ Markup.button.text('Отмена') ] ]),
   [UserState.AskingWeekGroup]: Markup.keyboard([ [ Markup.button.text('Отмена') ] ]),
@@ -27,7 +27,8 @@ export const batchButtons = (buttons: InlineKeyboardButton[], rowSize = 3, extra
 }
 
 export const callbackIdBuild = (command: string, args?: string[]): string => {
-  return [command, ...(args || [])].join(CallbackIdSplitter)
+  return [ command, ...(args || []) ].join(CallbackIdSplitter)
 }
 
-export const dateToCallback = (date: Date): string => `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate()}`
+export const dateToCallback = (date: Date): string =>
+  `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate()}`

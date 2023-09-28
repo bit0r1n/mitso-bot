@@ -9,7 +9,7 @@ import { callbackQuery, message } from 'telegraf/filters'
 import { getWeekStart, lessonsToMessage, weekToHuman } from './keeper/helpers'
 import { Group } from './parser/interfaces'
 
-['BOT_TOKEN', 'MONGO_URL', 'PARSER_URL', 'KEEPER_URL'].every(key => {
+[ 'BOT_TOKEN', 'MONGO_URL', 'PARSER_URL', 'KEEPER_URL' ].every(key => {
   if (!process.env[key])
     throw new Error(`${key} is not set`)
 })
@@ -23,7 +23,7 @@ const keeper = new Keeper(process.env.KEEPER_URL!)
 bot.use(async (ctx, next) => {
   if (!ctx.from) return
 
-  let chatId = ctx.from.id
+  const chatId = ctx.from.id
   let user = await User.findOne({ telegramId: chatId })
 
   if (!user) {
@@ -154,7 +154,10 @@ bot.hears('Другие расписания', async (ctx) => {
   await ctx.reply('🥾 Выбери какое расписание тебе нужно', {
     parse_mode: 'MarkdownV2',
     reply_markup: Markup.inlineKeyboard([
-      [ Markup.button.callback('Преподаватель', callbackIdBuild('teacher_week')), Markup.button.callback('Группа', callbackIdBuild('group_week')) ]
+      [ Markup.button.callback(
+          'Преподаватель', callbackIdBuild('teacher_week')),
+        Markup.button.callback(
+          'Группа', callbackIdBuild('group_week')) ]
     ]).reply_markup
   })
 })
@@ -271,7 +274,7 @@ bot.on(callbackQuery('data'), async (ctx) => {
       await ctx.user.save()
 
       await ctx.answerCbQuery()
-      await ctx.editMessageReplyMarkup(Markup.inlineKeyboard([[]]).reply_markup)
+      await ctx.editMessageReplyMarkup(Markup.inlineKeyboard([ [] ]).reply_markup)
 
       await ctx.reply('🤨', {
         reply_markup: keyboards[ctx.user.state as UserState].resize().reply_markup
@@ -295,8 +298,8 @@ bot.on(callbackQuery('data'), async (ctx) => {
 
       if (!lessons.length) {
         await ctx.answerCbQuery()
-        await ctx.editMessageReplyMarkup(Markup.inlineKeyboard([[]]).reply_markup)
-        await ctx.editMessageText(`🪤 Кажется кто-то кайфует на этой неделе`)
+        await ctx.editMessageReplyMarkup(Markup.inlineKeyboard([ [] ]).reply_markup)
+        await ctx.editMessageText('🪤 Кажется кто-то кайфует на этой неделе')
         return
       }
 

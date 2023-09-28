@@ -1,4 +1,4 @@
-import { Course, Faculty, Form } from "./interfaces";
+import { Course, Faculty, Form } from './interfaces'
 
 export const formToIdMap = {
   [Form.FullTime]: 'Dnevnaya',

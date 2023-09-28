@@ -17,7 +17,6 @@ services:
     build: ./keeper
     restart: always
     environment:
-      - NODE_ENV=production
       - MONGODB_URL=mongodb://mongo:27017
     depends_on:
       - mongo
