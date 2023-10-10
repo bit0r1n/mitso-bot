@@ -37,6 +37,12 @@ bot.use(async (ctx, next) => {
 
   ctx.user = user
 
+  if (ctx.user.username !== ctx.from.username) {
+    ctx.user.username = ctx.from.username
+    // @ts-ignore
+    await ctx.user.save()
+  }
+
   if (ctx.user.blacklisted === true) return
 
   return next()
