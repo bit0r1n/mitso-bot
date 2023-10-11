@@ -1,5 +1,6 @@
 import { Parser } from '../api/Parser'
 import { lessonToScheme } from '../api/helpers'
+import { Day } from '../api/interfaces'
 import { Lesson } from '../schemas/Lesson'
 import { Teacher } from '../schemas/Teacher'
 
@@ -29,7 +30,13 @@ export async function parseJob() {
     }
 
     for (const week of weeks) {
-      const schedule = await parser.getGroupSchedule(group.id, parseInt(week.id))
+      let schedule: Day[]
+
+      try {
+        schedule = await parser.getGroupSchedule(group.id, parseInt(week.id))
+      } catch {
+        continue
+      }
 
       const lessons = schedule.map(day => day.lessons).flat(1)
       const lessonsDocuments = lessons.map(lesson => new Lesson(lessonToScheme(lesson, group.id)))

@@ -57,13 +57,16 @@ router parserRouter:
     if weeks.filterIt(it.id == @"week").len == 0:
       raise newException(WeekNotFound, "Week not found")
 
-    let schedule = await group.getSchedule(@"week")
+    try:
+      let schedule = await group.getSchedule(@"week")
 
-    resp(
-      Http200,
-      $(%*{ "result": %schedule }),
-      "application/json; charset=utf-8"
-    )
+      resp(
+        Http200,
+        $(%*{ "result": %schedule }),
+        "application/json; charset=utf-8"
+      )
+    except:
+      raise newException(FailedToParseWeek, "Failed to parse week")
   error GroupNotFound:
     resp(
       Http404,
@@ -74,6 +77,12 @@ router parserRouter:
     resp(
       Http404,
       $(%*{ "error": "Week not found" }),
+      "application/json; charset=utf-8"
+    )
+  error FailedToParseWeek:
+    resp(
+      Http500,
+      $(%*{ "error": "Failed to parse week" }),
       "application/json; charset=utf-8"
     )
   error Http404:
