@@ -55,6 +55,47 @@ bot.start(async ctx => {
     return
   }
 
+  const state: UserState = ctx.user.state
+
+  switch (state) {
+    case UserState.MainMenu: {
+      await ctx.reply('🍆 Погоди, я пока жду от тебя номер группы', {
+        reply_markup: keyboards[state].resize().reply_markup
+      })
+      return
+    }
+    case UserState.AskingGroup: {
+      await ctx.reply('🍆 Погоди, я пока жду от тебя номер группы', {
+        reply_markup: keyboards[state].resize().reply_markup
+      })
+      return
+    }
+    case UserState.ChoosingGroup: {
+      await ctx.reply('👞 Выбери группу', {
+        reply_markup: batchButtons(
+          ctx.user.choosing_groups
+            .map(g => Markup.button.callback(
+              g.display!,
+              callbackIdBuild('select_group', [ g.id! ])
+            ))
+        ).reply_markup
+      })
+      return
+    }
+    case UserState.AskingWeekGroup: {
+      await ctx.reply('🥥 Напиши номер группы, распиание которой ты хочешь узнать', {
+        reply_markup: keyboards[state].resize().reply_markup
+      })
+      return
+    }
+    case UserState.AskingWeekTeacher: {
+      await ctx.reply('📛 Напиши инициалы преподавателя, расписание которого ты хочешь узнать', {
+        reply_markup: keyboards[state].resize().reply_markup
+      })
+      return
+    }
+  }
+
   if (ctx.user.state === UserState.MainMenu) {
     await ctx.reply('🍉 Хватай меню', {
       reply_markup: keyboards[ctx.user.state].resize().reply_markup
@@ -196,9 +237,10 @@ bot.on(callbackQuery('data'), async (ctx) => {
   const [ command, ...args ] = ctx.callbackQuery.data.split(CallbackIdSplitter)
 
   if (command === 'select_group') {
+    ctx.user.choosing_groups = []
+
     const group = ctx.user.choosing_groups.find(g => g.id === args[0])
     if (!group) {
-      ctx.user.choosing_groups = []
       ctx.user.state = UserState.AskingGroup
       // @ts-ignore
       await ctx.user.save()
