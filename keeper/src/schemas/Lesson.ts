@@ -1,4 +1,5 @@
 import * as mongoose from 'mongoose'
+import { LessonTime, LessonType } from '../api/interfaces'
 
 function getWeekStart(date: Date = new Date()) {
   const dayOfWeek = date.getDay()
@@ -16,7 +17,22 @@ export interface LessonFilterOptions {
   before?: Date;
 }
 
-const lessonSchema = new mongoose.Schema({
+export interface ILesson {
+  date: Date
+  name: String
+  type: LessonType
+  time: LessonTime
+  teachers?: string[]
+  classrooms?: string[]
+  group: string
+}
+
+interface LessonModel extends mongoose.Model<ILesson> {
+  getWeeks(group: string, from?: Date): Promise<Date[]>
+  getLessons(filter?: LessonFilterOptions): Promise<ILesson[]>
+}
+
+const lessonSchema = new mongoose.Schema<ILesson, LessonModel>({
   date: Date,
   name: String,
   type: Number,
@@ -91,6 +107,4 @@ const lessonSchema = new mongoose.Schema({
   }
 })
 
-export type Lesson = mongoose.InferSchemaType<typeof lessonSchema>
-export const Lesson = mongoose.model('Lesson', lessonSchema)
-export const LessonSchema = lessonSchema
+export const Lesson = mongoose.model<ILesson, LessonModel>('Lesson', lessonSchema)

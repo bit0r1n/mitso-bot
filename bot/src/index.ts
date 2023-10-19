@@ -38,8 +38,7 @@ bot.use(async (ctx, next) => {
   ctx.user = user
 
   if (ctx.user.username !== ctx.from.username) {
-    ctx.user.username = ctx.from.username
-    // @ts-ignore
+    ctx.user.username = ctx.from.username!
     await ctx.user.save()
   }
 
@@ -59,7 +58,7 @@ bot.start(async ctx => {
 
   switch (state) {
     case UserState.MainMenu: {
-      await ctx.reply('🍆 Погоди, я пока жду от тебя номер группы', {
+      await ctx.reply('🍉 Хватай меню', {
         reply_markup: keyboards[state].resize().reply_markup
       })
       return
@@ -73,7 +72,7 @@ bot.start(async ctx => {
     case UserState.ChoosingGroup: {
       await ctx.reply('👞 Выбери группу', {
         reply_markup: batchButtons(
-          ctx.user.choosing_groups
+          ctx.user.choosing_groups!
             .map(g => Markup.button.callback(
               g.display!,
               callbackIdBuild('select_group', [ g.id! ])
@@ -94,26 +93,6 @@ bot.start(async ctx => {
       })
       return
     }
-  }
-
-  if (ctx.user.state === UserState.MainMenu) {
-    await ctx.reply('🍉 Хватай меню', {
-      reply_markup: keyboards[ctx.user.state].resize().reply_markup
-    })
-  } else if (ctx.user.state === UserState.AskingGroup) {
-    await ctx.reply('🍆 Погоди, я пока жду от тебя номер группы', {
-      reply_markup: keyboards[ctx.user.state].resize().reply_markup
-    })
-  } else if (ctx.user.state === UserState.ChoosingGroup) {
-    await ctx.reply('👞 Выбери группу', {
-      reply_markup: batchButtons(
-        ctx.user.choosing_groups
-          .map(g => Markup.button.callback(
-            g.display!,
-            callbackIdBuild('select_group', [ g.id! ])
-          ))
-      ).reply_markup
-    })
   }
 })
 
@@ -187,7 +166,6 @@ bot.hears('Сменить группу', async (ctx) => {
   if (ctx.user.state !== UserState.MainMenu) return
 
   ctx.user.state = UserState.AskingGroup
-  // @ts-ignore
   await ctx.user.save()
 
   await ctx.reply('👡 Введи номер группы', {
@@ -215,20 +193,18 @@ bot.hears('Отмена', async (ctx) => {
       await ctx.reply('😳 Нее, без группы мы не начинаем')
     } else {
       ctx.user.state = UserState.MainMenu
-      // @ts-ignore
       await ctx.user.save()
 
       await ctx.reply('🫠 ладн', {
-        reply_markup: keyboards[ctx.user.state as UserState].resize().reply_markup
+        reply_markup: keyboards[ctx.user.state].resize().reply_markup
       })
     }
   } else if ([ UserState.AskingWeekTeacher, UserState.AskingWeekGroup ].includes(ctx.user.state)) {
     ctx.user.state = UserState.MainMenu
-    // @ts-ignore
     await ctx.user.save()
 
     await ctx.reply('👍 (ок (👍))', {
-      reply_markup: keyboards[ctx.user.state as UserState].resize().reply_markup
+      reply_markup: keyboards[ctx.user.state].resize().reply_markup
     })
   }
 })
@@ -237,11 +213,10 @@ bot.on(callbackQuery('data'), async (ctx) => {
   const [ command, ...args ] = ctx.callbackQuery.data.split(CallbackIdSplitter)
 
   if (command === 'select_group') {
-    const group = ctx.user.choosing_groups.find(g => g.id === args[0])
+    const group = ctx.user.choosing_groups!.find(g => g.id === args[0])
     if (!group) {
       ctx.user.choosing_groups = []
       ctx.user.state = UserState.AskingGroup
-      // @ts-ignore
       await ctx.user.save()
 
       await ctx.reply('😵‍💫 Кажется произошла какая-то ошибка при выборе группы. Попробуй поискать новую группу, отправив её номер')
@@ -251,13 +226,12 @@ bot.on(callbackQuery('data'), async (ctx) => {
 
     ctx.user.group = { id: group.id, display: group.display }
     ctx.user.state = UserState.MainMenu
-    // @ts-ignore
     await ctx.user.save()
 
     await ctx.deleteMessage().catch(() => {})
 
     await ctx.replyWithMarkdownV2(`🫔 Выбрана группа *${group.display}*`, {
-      reply_markup: keyboards[ctx.user.state as UserState].resize().reply_markup
+      reply_markup: keyboards[ctx.user.state].resize().reply_markup
     })
     return
   } else if (command === 'week') {
@@ -318,14 +292,13 @@ bot.on(callbackQuery('data'), async (ctx) => {
 
     if (!teacherName) {
       ctx.user.state = UserState.AskingWeekTeacher
-      // @ts-ignore
       await ctx.user.save()
 
       await ctx.answerCbQuery()
       await ctx.editMessageReplyMarkup(Markup.inlineKeyboard([ [] ]).reply_markup)
 
       await ctx.reply('🤨', {
-        reply_markup: keyboards[ctx.user.state as UserState].resize().reply_markup
+        reply_markup: keyboards[ctx.user.state].resize().reply_markup
       })
 
       await ctx.editMessageText('🧄 Напиши инициалы преподавателя или его часть\n\nОбычно они в формате Фамилия И. О.')
@@ -365,14 +338,13 @@ bot.on(callbackQuery('data'), async (ctx) => {
 
     if (!groupId) {
       ctx.user.state = UserState.AskingWeekGroup
-      // @ts-ignore
       await ctx.user.save()
 
       await ctx.answerCbQuery()
       await ctx.editMessageReplyMarkup(Markup.inlineKeyboard([ [] ]).reply_markup)
 
       await ctx.reply('🤨', {
-        reply_markup: keyboards[ctx.user.state as UserState].resize().reply_markup
+        reply_markup: keyboards[ctx.user.state].resize().reply_markup
       })
 
       await ctx.editMessageText('🥕 Напиши номер группы для поиска расписания')
@@ -435,11 +407,10 @@ bot.on(message('text'), async (ctx) => {
     }
 
     ctx.user.state = UserState.MainMenu
-    // @ts-ignore
     await ctx.user.save()
 
     ctx.reply('🤨', {
-      reply_markup: keyboards[ctx.user.state as UserState].resize().reply_markup
+      reply_markup: keyboards[ctx.user.state].resize().reply_markup
     })
 
     await ctx.reply('🍍 Выбери группу', {
@@ -459,11 +430,10 @@ bot.on(message('text'), async (ctx) => {
     }
 
     ctx.user.state = UserState.MainMenu
-    // @ts-ignore
     await ctx.user.save()
 
     ctx.reply('🤨', {
-      reply_markup: keyboards[ctx.user.state as UserState].resize().reply_markup
+      reply_markup: keyboards[ctx.user.state].resize().reply_markup
     })
 
     await ctx.reply('🍍 Выбери преподавателя', {
@@ -484,7 +454,6 @@ bot.on(message('text'), async (ctx) => {
 
     ctx.user.choosing_groups = groups.map(g => ({ id: g.id, display: g.display }))
     ctx.user.state = UserState.ChoosingGroup
-    // @ts-ignore
     await ctx.user.save()
 
     await ctx.reply('👞 Выбери группу', {
@@ -495,7 +464,7 @@ bot.on(message('text'), async (ctx) => {
     })
 
     await ctx.reply('🤨', {
-      reply_markup: keyboards[ctx.user.state as UserState].resize().reply_markup
+      reply_markup: keyboards[ctx.user.state].resize().reply_markup
     })
   }
 })

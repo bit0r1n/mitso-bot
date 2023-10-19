@@ -1,9 +1,11 @@
 import * as mongoose from 'mongoose'
 
-const teacherSchema = new mongoose.Schema({
+export interface ITeacher {
+  name: string
+}
+
+const teacherSchema = new mongoose.Schema<ITeacher>({
   name: { type: String, required: true, unique: true }
 })
 
-export type Teacher = mongoose.InferSchemaType<typeof teacherSchema>
-export const Teacher = mongoose.model('Teacher', teacherSchema)
-export const TeacherSchema = teacherSchema
+export const Teacher = mongoose.model<ITeacher>('Teacher', teacherSchema)
