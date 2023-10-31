@@ -10,16 +10,16 @@ function getWeekStart(date: Date = new Date()) {
 }
 
 export interface LessonFilterOptions {
-  group?: string;
-  teachers?: string[];
-  classrooms?: string[];
-  from?: Date;
-  before?: Date;
+  group?: string
+  teachers?: string[]
+  classrooms?: string[]
+  from?: Date
+  before?: Date
 }
 
 export interface ILesson {
   date: Date
-  name: String
+  name: string
   type: LessonType
   time: LessonTime
   teachers?: string[]
@@ -37,19 +37,19 @@ const lessonSchema = new mongoose.Schema<ILesson, LessonModel>({
   name: String,
   type: Number,
   time: Number,
-  teachers: [String],
-  classrooms: [String],
+  teachers: [ String ],
+  classrooms: [ String ],
   group: String,
 }, {
   statics: {
     async getWeeks(group: string, from?: Date): Promise<Date[]> {
-      const filterOptions: Record<string, any> = {
+      const filterOptions: mongoose.FilterQuery<ILesson> = {
         group
       }
 
       if (from) {
         filterOptions['date'] = {
-          $gte: getWeekStart(from)
+          $gte: getWeekStart(from),
         }
       }
 
@@ -60,7 +60,7 @@ const lessonSchema = new mongoose.Schema<ILesson, LessonModel>({
         startsOfWeeks.add(getWeekStart(lesson.date).toString())
       }
 
-      return [...startsOfWeeks].map(date => new Date(date))
+      return [ ...startsOfWeeks ].map(date => new Date(date))
     },
     async getLessons(filter?: LessonFilterOptions) {
       const filterOptions: Record<string, any> = {}

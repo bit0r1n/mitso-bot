@@ -13,14 +13,14 @@ export async function parseJob() {
 
   console.debug('Got %d groups', groups.length)
 
-  let groupIndex = 0;
+  let groupIndex = 0
 
   const teacherSet = new Set<string>()
 
   for (const group of groups) {
     console.debug('Getting weeks for "%s" group [%d/%d]', group.id, ++groupIndex, groups.length)
 
-    const weeks = await parser.getGroupWeeks(group.id)
+    const weeks = await parser.getGroupWeeks(group.id, { course: group.course })
 
     console.log('Got weeks: [%s]', weeks.map(w => w.display).join(', '))
 
@@ -33,7 +33,7 @@ export async function parseJob() {
       let schedule: Day[]
 
       try {
-        schedule = await parser.getGroupSchedule(group.id, parseInt(week.id))
+        schedule = await parser.getGroupSchedule(group.id, parseInt(week.id), { course: group.course })
       } catch {
         continue
       }
@@ -73,7 +73,7 @@ export async function parseJob() {
 
   groups.splice(0, groups.length)
 
-  const parsedTeachers = [...teacherSet]
+  const parsedTeachers = [ ...teacherSet ]
   const teachers = await Teacher.find()
 
   teacherSet.clear()
@@ -92,5 +92,5 @@ export async function parseJob() {
   teachers.splice(0, teachers.length)
   teachersToSave.splice(0, teachersToSave.length)
 
-  console.debug('Done');
+  console.debug('Done')
 }

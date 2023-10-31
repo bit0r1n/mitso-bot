@@ -1,5 +1,5 @@
-import { DayOfWeek, Lesson, LessonTime, LessonType } from "./interfaces"
-import { Lesson as LessonScheme } from '../schemas/Lesson'
+import { Course, DayOfWeek, Faculty, Form, Lesson, LessonTime, LessonType } from './interfaces'
+import { ILesson } from '../schemas/Lesson'
 
 export function parseLessonType(raw: string): LessonType {
   switch (raw) {
@@ -67,7 +67,44 @@ export function parseDayOfWeek(raw: string): DayOfWeek {
   }
 }
 
-export const lessonToScheme = (lesson: Lesson, group: string): LessonScheme => ({
+export function formToRaw(form: Form): string {
+  switch (form) {
+    case Form.FullTime:
+      return 'Dnevnaya'
+    case Form.PartTime:
+      return 'Zaochnaya'
+    case Form.PartTimeReduced:
+      return 'Zaochnaya sokrashhennaya'
+  }
+}
+
+export function courseToRaw(course: Course): string {
+  switch (course) {
+    case Course.First:
+      return '1 kurs'
+    case Course.Second:
+      return '2 kurs'
+    case Course.Third:
+      return '3 kurs'
+    case Course.Fourth:
+      return '4 kurs'
+    case Course.Fifth:
+      return '5 kurs'
+  }
+}
+
+export function facultyToRaw(faculty: Faculty): string {
+  switch (faculty) {
+    case Faculty.Economical:
+      return 'E`konomicheskij'
+    case Faculty.Legal:
+      return 'YUridicheskij'
+    case Faculty.Magistracy:
+      return 'Magistratura'
+  }
+}
+
+export const lessonToScheme = (lesson: Lesson, group: string): ILesson => ({
   type: lesson.type,
   date: lesson.date,
   name: lesson.name,

@@ -1,40 +1,98 @@
-import { parseDayOfWeek, parseLessonTime, parseLessonType } from './helpers';
-import { Day, Group, SelectOption } from './interfaces'
+import { courseToRaw, facultyToRaw, formToRaw, parseDayOfWeek, parseLessonTime, parseLessonType } from './helpers'
+import { Course, Day, Faculty, Form, Group, SelectOption } from './interfaces'
 import { join } from 'path'
 
 export interface ParserApiOptions {
-  url?: string;
+  url?: string
 }
 
 interface LessonResponse {
-  date: string;
-  name: string;
-  teachers: string[];
-  time: string;
-  type: string;
-  classrooms: string[];
+  date: string
+  name: string
+  teachers: string[]
+  time: string
+  type: string
+  classrooms: string[]
 }
 
 interface DayResponse {
-  date: string;
-  display_date: string;
-  day_of_week: string;
-  lessons: LessonResponse[];
+  date: string
+  display_date: string
+  day_of_week: string
+  lessons: LessonResponse[]
+}
+
+interface GroupFilterOptions {
+  id?: string
+  display?: string
+  course?: Course
+  form?: Form
+  faculty?: Faculty
 }
 
 export class Parser {
-  private url: string;
+  private url: string
   constructor(options?: ParserApiOptions) {
-    this.url = options?.url || `http://parser:3000`
+    this.url = options?.url || 'http://parser:3000'
   }
 
-  async getGroups(): Promise<Group[]> {
-    const req = await fetch(join(this.url, 'groups'))
+  async getGroups(filter?: GroupFilterOptions): Promise<Group[]> {
+    const url = new URL(join(this.url, 'groups'))
+    
+    if (filter) {
+      for (const filterKey in filter) {
+        const key = filterKey as keyof GroupFilterOptions
+        let filterValue: string
+
+        switch (key) {
+          case 'course':
+            filterValue = courseToRaw(filter[key]!)
+            break
+          case 'form':
+            filterValue = formToRaw(filter[key]!)
+            break
+          case 'faculty':
+            filterValue = facultyToRaw(filter[key]!)
+            break
+          default:
+            filterValue = filter[key]!
+        }
+        
+        url.searchParams.append(filterKey, filterValue)
+      }
+    }
+
+    const req = await fetch(url)
     return (await req.json()).result
   }
 
-  async getGroup(id: string): Promise<Group> {
-    const req = await fetch(join(this.url, 'groups', encodeURIComponent(id)))
+  async getGroup(id: string, filter?: GroupFilterOptions): Promise<Group> {
+    const url = new URL(join(this.url, 'groups', encodeURIComponent(id)))
+
+    if (filter) {
+      for (const filterKey in filter) {
+        const key = filterKey as keyof GroupFilterOptions
+        let filterValue: string
+
+        switch (key) {
+          case 'course':
+            filterValue = courseToRaw(filter[key]!)
+            break
+          case 'form':
+            filterValue = formToRaw(filter[key]!)
+            break
+          case 'faculty':
+            filterValue = facultyToRaw(filter[key]!)
+            break
+          default:
+            filterValue = filter[key]!
+        }
+        
+        url.searchParams.append(filterKey, filterValue)
+      }
+    }
+
+    const req = await fetch(url)
     const res = await req.json()
 
     if (res.result) {
@@ -44,8 +102,33 @@ export class Parser {
     }
   }
 
-  async getGroupWeeks(id: string): Promise<SelectOption[]> {
-    const req = await fetch(join(this.url, 'groups', encodeURIComponent(id), 'weeks'))
+  async getGroupWeeks(id: string, groupFilter?: GroupFilterOptions): Promise<SelectOption[]> {
+    const url = new URL(join(this.url, 'groups', encodeURIComponent(id), 'weeks'))
+
+    if (groupFilter) {
+      for (const filterKey in groupFilter) {
+        const key = filterKey as keyof GroupFilterOptions
+        let filterValue: string
+
+        switch (key) {
+          case 'course':
+            filterValue = courseToRaw(groupFilter[key]!)
+            break
+          case 'form':
+            filterValue = formToRaw(groupFilter[key]!)
+            break
+          case 'faculty':
+            filterValue = facultyToRaw(groupFilter[key]!)
+            break
+          default:
+            filterValue = groupFilter[key]!
+        }
+        
+        url.searchParams.append(filterKey, filterValue)
+      }
+    }
+
+    const req = await fetch(url)
     const res = await req.json()
 
     if (res.result) {
@@ -55,8 +138,33 @@ export class Parser {
     }
   }
 
-  async getGroupSchedule(id: string, week: number): Promise<Day[]> {
-    const req = await fetch(join(this.url, 'groups', encodeURIComponent(id), 'weeks', week.toString()))
+  async getGroupSchedule(id: string, week: number, groupFilter?: GroupFilterOptions): Promise<Day[]> {
+    const url = new URL(join(this.url, 'groups', encodeURIComponent(id), 'weeks', week.toString()))
+
+    if (groupFilter) {
+      for (const filterKey in groupFilter) {
+        const key = filterKey as keyof GroupFilterOptions
+        let filterValue: string
+
+        switch (key) {
+          case 'course':
+            filterValue = courseToRaw(groupFilter[key]!)
+            break
+          case 'form':
+            filterValue = formToRaw(groupFilter[key]!)
+            break
+          case 'faculty':
+            filterValue = facultyToRaw(groupFilter[key]!)
+            break
+          default:
+            filterValue = groupFilter[key]!
+        }
+        
+        url.searchParams.append(filterKey, filterValue)
+      }
+    }
+
+    const req = await fetch(url)
     const res = await req.json()
 
     if (res.result) {

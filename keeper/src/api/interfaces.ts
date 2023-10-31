@@ -50,33 +50,33 @@ export enum DayOfWeek {
 }
 
 export interface Group {
-  id: string;
-  display: string;
-  course: Course;
-  form: Form;
-  faculty: Faculty;
-  course_human: string;
-  form_human: string;
-  faculty_human: string;
+  id: string
+  display: string
+  course: Course
+  form: Form
+  faculty: Faculty
+  course_human: string
+  form_human: string
+  faculty_human: string
 }
 
 export interface SelectOption {
-  id: string;
-  display: string;
+  id: string
+  display: string
 }
 
 export interface Lesson {
-  date: Date;
-  name: string;
-  teachers: string[];
-  classrooms: string[];
-  type: LessonType;
-  time: LessonTime;
+  date: Date
+  name: string
+  teachers: string[]
+  classrooms: string[]
+  type: LessonType
+  time: LessonTime
 }
 
 export interface Day {
-  date: Date;
-  display_date: string;
-  day_of_week: number;
-  lessons: Lesson[];
+  date: Date
+  display_date: string
+  day_of_week: number
+  lessons: Lesson[]
 }

@@ -1,5 +1,5 @@
 import mitso/[typedefs, helpers]
-import json, strutils, tables, sequtils, times
+import json, strutils, tables, sequtils, times, uri
 
 proc `%`*(select: SelectOption): JsonNode =
   result = newJObject()
@@ -46,3 +46,5 @@ proc filterGroups*(groups: seq[Group], query: Table[string, string]): seq[Group]
       result = result.filterIt(%it.form == value)
     elif field == "faculty":
       result = result.filterIt(%it.faculty == value)
+
+proc queryToTable*(query: string): Table[string, string] = toTable(toSeq(decodeQuery(query)))

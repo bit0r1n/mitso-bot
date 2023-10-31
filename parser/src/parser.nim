@@ -23,21 +23,33 @@ router parserRouter:
       "application/json; charset=utf-8"
     )
   get "/groups/@id":
-    let id = decodeUrl(@"id")
-    if mitsoParser.groups.filterIt(it.id == id).len == 0:
+    let
+      id = decodeUrl(@"id")
+      filteredGroups = filterGroups(
+        mitsoParser.groups,
+        toTable(toSeq(decodeQuery(request.query)))
+      ).filterIt(it.id == id)
+
+    if filteredGroups.len == 0:
       raise newException(GroupNotFound, "Group not found")
     resp(
       Http200,
-      $(%*{ "result": %mitsoParser.groups.filterIt(it.id == id)[0] }),
+      $(%*{ "result": %filteredGroups[0] }),
       "application/json; charset=utf-8"
     )
   get "/groups/@id/weeks":
-    let id = decodeUrl(@"id")
-    if mitsoParser.groups.filterIt(it.id == id).len == 0:
+    let
+      id = decodeUrl(@"id")
+      filteredGroups = filterGroups(
+        mitsoParser.groups,
+        toTable(toSeq(decodeQuery(request.query)))
+      ).filterIt(it.id == id)
+
+    if filteredGroups.len == 0:
       raise newException(GroupNotFound, "Group not found")
 
     let
-      group = mitsoParser.groups.filterIt(it.id == id)[0]
+      group = filteredGroups[0]
       weeks = await group.getWeeks()
 
     resp(
@@ -46,12 +58,18 @@ router parserRouter:
       "application/json; charset=utf-8"
     )
   get "/groups/@id/weeks/@week":
-    let id = decodeUrl(@"id")
-    if mitsoParser.groups.filterIt(it.id == id).len == 0:
+    let
+      id = decodeUrl(@"id")
+      filteredGroups = filterGroups(
+        mitsoParser.groups,
+        toTable(toSeq(decodeQuery(request.query)))
+      ).filterIt(it.id == id)
+
+    if filteredGroups.len == 0:
       raise newException(GroupNotFound, "Group not found")
 
     let
-      group = mitsoParser.groups.filterIt(it.id == id)[0]
+      group = filteredGroups[0]
       weeks = await group.getWeeks()
 
     if weeks.filterIt(it.id == @"week").len == 0:

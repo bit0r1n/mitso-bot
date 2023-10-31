@@ -5,6 +5,7 @@ services:
     restart: always
     volumes:
       - ./data:/data/db
+    command: --quiet
   parser:
     build: ./parser
     restart: always
@@ -19,8 +20,10 @@ services:
     environment:
       - MONGODB_URL=mongodb://mongo:27017
     depends_on:
-      - mongo
-      - parser
+      mongo:
+        condition: service_started
+      parser:
+        condition: service_healthy
   bot:
     build: ./bot
     restart: always
@@ -30,10 +33,14 @@ services:
       - PARSER_URL=http://parser:3000
       - KEEPER_URL=http://keeper:3000
     depends_on:
-      - parser
-      - keeper
-      - mongo
+      parser:
+        condition: service_healthy
+      keeper:
+        condition: service_started
+      mongo:
+        condition: service_started
   cron:
     build: ./cron
     depends_on:
-      - keeper
+      keeper:
+        condition: service_started

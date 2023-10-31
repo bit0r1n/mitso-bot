@@ -122,11 +122,11 @@ app.get('/lessons', async (req, res) => {
   if (before) filter.before = new Date(before)
 
   if (teachers) {
-    filter.teachers = Array.isArray(teachers) ? teachers : [teachers]
+    filter.teachers = Array.isArray(teachers) ? teachers : [ teachers ]
   }
 
   if (classrooms) {
-    filter.classrooms = Array.isArray(classrooms) ? classrooms : [classrooms]
+    filter.classrooms = Array.isArray(classrooms) ? classrooms : [ classrooms ]
   }
 
   const lessons = await Lesson.getLessons(filter)
