@@ -20,7 +20,7 @@ export async function parseJob() {
   for (const group of groups) {
     console.debug('Getting weeks for "%s" group [%d/%d]', group.id, ++groupIndex, groups.length)
 
-    const weeks = await parser.getGroupWeeks(group.id, { course: group.course })
+    const weeks = await parser.getGroupWeeks(group.id, { faculty: group.faculty })
 
     console.log('Got weeks: [%s]', weeks.map(w => w.display).join(', '))
 
@@ -33,7 +33,7 @@ export async function parseJob() {
       let schedule: Day[]
 
       try {
-        schedule = await parser.getGroupSchedule(group.id, parseInt(week.id), { course: group.course })
+        schedule = await parser.getGroupSchedule(group.id, parseInt(week.id), { faculty: group.faculty })
       } catch {
         continue
       }
