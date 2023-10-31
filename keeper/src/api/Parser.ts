@@ -1,9 +1,30 @@
-import { courseToRaw, facultyToRaw, formToRaw, parseDayOfWeek, parseLessonTime, parseLessonType } from './helpers'
+import {
+  courseToRaw,
+  facultyToRaw,
+  formToRaw,
+  parseCourse,
+  parseDayOfWeek,
+  parseFaculty,
+  parseForm,
+  parseLessonTime,
+  parseLessonType
+} from './helpers'
 import { Course, Day, Faculty, Form, Group, SelectOption } from './interfaces'
 import { join } from 'path'
 
 export interface ParserApiOptions {
   url?: string
+}
+
+interface RawGroup {
+  id: string
+  display: string
+  course: string
+  form: string
+  faculty: string
+  course_human: string
+  form_human: string
+  faculty_human: string
 }
 
 interface LessonResponse {
@@ -63,7 +84,13 @@ export class Parser {
     }
 
     const req = await fetch(url)
-    return (await req.json()).result
+    return ((await req.json()).result as RawGroup[])
+      .map(rawGroup => ({
+        ...rawGroup,
+        course: parseCourse(rawGroup.course),
+        form: parseForm(rawGroup.form),
+        faculty: parseFaculty(rawGroup.faculty)
+      }))
   }
 
   async getGroup(id: string, filter?: GroupFilterOptions): Promise<Group> {
@@ -96,7 +123,14 @@ export class Parser {
     const res = await req.json()
 
     if (res.result) {
-      return res.result
+      const rawGroup = res.result as RawGroup
+      
+      return {
+        ...rawGroup,
+        course: parseCourse(rawGroup.course),
+        form: parseForm(rawGroup.form),
+        faculty: parseFaculty(rawGroup.faculty)
+      }
     } else {
       throw new Error(res.error)
     }

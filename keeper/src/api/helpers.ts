@@ -1,6 +1,49 @@
 import { Course, DayOfWeek, Faculty, Form, Lesson, LessonTime, LessonType } from './interfaces'
 import { ILesson } from '../schemas/Lesson'
 
+export function parseForm(raw: string): Form {
+  switch (raw) {
+    case 'Dnevnaya':
+      return Form.FullTime
+    case 'Zaochnaya':
+      return Form.PartTime
+    case 'Zaochnaya sokrashhennaya':
+      return Form.PartTimeReduced
+    default:
+      throw new Error('Unknown form: ' + raw)
+  }
+}
+
+export function parseFaculty(raw: string): Faculty {
+  switch (raw) {
+    case 'Magistratura':
+      return Faculty.Magistracy
+    case 'E`konomicheskij':
+      return Faculty.Economical
+    case 'YUridicheskij':
+      return Faculty.Legal
+    default:
+      throw new Error('Unknown faculty: ' + raw)
+  }
+}
+
+export function parseCourse(raw: string): Course {
+  switch (raw) {
+    case '1 kurs':
+      return Course.First
+    case '2 kurs':
+      return Course.Second
+    case '3 kurs':
+      return Course.Third
+    case '4 kurs':
+      return Course.Fourth
+    case '5 kurs':
+      return Course.Fifth
+    default:
+      throw new Error('Unknown course: ' + raw)
+  }
+}
+
 export function parseLessonType(raw: string): LessonType {
   switch (raw) {
     case 'Лекция':
