@@ -1,6 +1,6 @@
 import express from 'express'
 import * as mongoose from 'mongoose'
-import { Lesson, LessonFilterOptions } from './schemas/Lesson'
+import { GetWeeksOptions, Lesson, LessonFilterOptions } from './schemas/Lesson'
 import { Parser } from './api/Parser'
 import { Teacher } from './schemas/Teacher'
 import { parseJob } from './cron/parseJob'
@@ -51,10 +51,11 @@ app.get('/parse_job', async (req, res) => {
 })
 
 app.get('/weeks', async (req, res) => {
-  const group = req.query.group as string
+  const group = req.query.group as string | undefined
+  const teachers = req.query.teachers as string | string[] | undefined
   const from = req.query.from as string | undefined
-  if (!group) {
-    res.status(400).json({ error: '"group" is required' })
+  if (!(group || teachers?.length)) {
+    res.status(400).json({ error: '"group" or "teachers" is required' })
     return
   }
 
@@ -63,22 +64,35 @@ app.get('/weeks', async (req, res) => {
     return
   }
 
-  try {
-    await new Parser().getGroup(group)
-  } catch (e) {
-    const error = e as Error
-    if (error.message === 'Group not found') {
-      res.status(404).json({ error: error.message })
+  if (group) {
+    try {
+      await new Parser().getGroup(group)
+    } catch (e) {
+      const error = e as Error
+      if (error.message === 'Group not found') {
+        res.status(404).json({ error: error.message })
+        return
+      }
+      res.status(500).json({ error: error.message })
       return
     }
-    res.status(500).json({ error: error.message })
-    return
   }
 
-  const weeks = await Lesson.getWeeks(
-    group,
-    from ? new Date(from) : undefined
-  )
+  const filter: GetWeeksOptions = {}
+
+  if (from) {
+    filter.from = new Date(from)
+  }
+
+  if (group) {
+    filter.group = group
+  }
+
+  if (teachers?.length) {
+    filter.teachers = Array.isArray(teachers) ? teachers : [ teachers ]
+  }
+
+  const weeks = await Lesson.getWeeks(filter)
 
   res.json({ result: weeks })
 })

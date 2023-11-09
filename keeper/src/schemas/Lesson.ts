@@ -17,6 +17,12 @@ export interface LessonFilterOptions {
   before?: Date
 }
 
+export interface GetWeeksOptions {
+  group?: string
+  teachers?: string[]
+  from?: Date
+}
+
 export interface ILesson {
   date: Date
   name: string
@@ -28,7 +34,7 @@ export interface ILesson {
 }
 
 interface LessonModel extends mongoose.Model<ILesson> {
-  getWeeks(group: string, from?: Date): Promise<Date[]>
+  getWeeks(filter?: GetWeeksOptions): Promise<Date[]>
   getLessons(filter?: LessonFilterOptions): Promise<ILesson[]>
 }
 
@@ -42,9 +48,18 @@ const lessonSchema = new mongoose.Schema<ILesson, LessonModel>({
   group: String,
 }, {
   statics: {
-    async getWeeks(group: string, from?: Date): Promise<Date[]> {
-      const filterOptions: mongoose.FilterQuery<ILesson> = {
-        group
+    async getWeeks(filter: GetWeeksOptions): Promise<Date[]> {
+      const { group, teachers, from } = filter
+      const filterOptions: mongoose.FilterQuery<ILesson> = {}
+
+      if (group) {
+        filterOptions['group'] = group
+      }
+
+      if (teachers?.length) {
+        filterOptions['teachers'] = {
+          $all: teachers
+        }
       }
 
       if (from) {

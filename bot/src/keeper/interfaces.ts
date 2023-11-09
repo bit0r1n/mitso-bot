@@ -1,5 +1,6 @@
 export interface WeeksSearchOptions {
-  group: string
+  group?: string
+  teachers?: string | string[]
   from?: Date
 }
 

@@ -74,6 +74,10 @@
         "allowEmptyCatch": true
       }
     ],
-    "@typescript-eslint/no-empty-function": "off"
+    "@typescript-eslint/no-empty-function": "off",
+    "indent": [
+      "error",
+      2
+    ]
   }
 }

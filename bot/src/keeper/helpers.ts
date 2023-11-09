@@ -30,41 +30,41 @@ export function getWeekStart(date: Date = new Date()) {
 
 export const lessonTimeToHuman = (time: LessonTime): string => {
   switch (time) {
-    case LessonTime.First:
-      return '08:00 - 9:20'
-    case LessonTime.Second:
-      return '09:35 - 10:55'
-    case LessonTime.Third:
-      return '11:05 - 12:25'
-    case LessonTime.Fourth:
-      return '13:00 - 14:20'
-    case LessonTime.Fifth:
-      return '14:35 - 15:55'
-    case LessonTime.Sixth:
-      return '16:25 - 17:45'
-    case LessonTime.Seventh:
-      return '17:55 - 19:15'
-    case LessonTime.Eighth:
-      return '19:25 - 20:45'
+  case LessonTime.First:
+    return '08:00 - 9:20'
+  case LessonTime.Second:
+    return '09:35 - 10:55'
+  case LessonTime.Third:
+    return '11:05 - 12:25'
+  case LessonTime.Fourth:
+    return '13:00 - 14:20'
+  case LessonTime.Fifth:
+    return '14:35 - 15:55'
+  case LessonTime.Sixth:
+    return '16:25 - 17:45'
+  case LessonTime.Seventh:
+    return '17:55 - 19:15'
+  case LessonTime.Eighth:
+    return '19:25 - 20:45'
   }
 }
 
 export const lessonTypeToHuman = (type: LessonType): string => {
   switch (type) {
-    case LessonType.Lecture:
-      return 'Лекция'
-    case LessonType.Practice:
-      return 'Практика'
-    case LessonType.Laboratory:
-      return 'Лабораторная'
-    case LessonType.CreditCourse:
-      return 'Зачет'
-    case LessonType.Consultation:
-      return 'Консультация'
-    case LessonType.Exam:
-      return 'Экзамен'
-    case LessonType.CourseProject:
-      return 'Курсовая'
+  case LessonType.Lecture:
+    return 'Лекция'
+  case LessonType.Practice:
+    return 'Практика'
+  case LessonType.Laboratory:
+    return 'Лабораторная'
+  case LessonType.CreditCourse:
+    return 'Зачет'
+  case LessonType.Consultation:
+    return 'Консультация'
+  case LessonType.Exam:
+    return 'Экзамен'
+  case LessonType.CourseProject:
+    return 'Курсовая'
   }
 }
 
@@ -74,7 +74,7 @@ export const lessonToMessage = (lesson: Lesson | LessonGroups, groups?: Group[])
   if ('groups' in lesson && groups) {
     if (lesson.groups.length) items.push(
       lesson.groups.map(group => groups.find(g => g.id === group)?.display ?? group
-    ).join(', '))
+      ).join(', '))
   }
   if (lesson.classrooms.length) items.push(`Ауд. ${lesson.classrooms.join(', ')}`)
   items.push(lesson.name)
@@ -115,7 +115,7 @@ export const lessonsToMessage = (lessons: Lesson[], groups?: Group[]): string =>
       }
 
       return acc
-  }, {} as Record<string, (Lesson | LessonGroups)[]>)
+    }, {} as Record<string, (Lesson | LessonGroups)[]>)
 
   const days = Object.entries(daysLessons).map(([ dayString, lessons ]) => {
     const day = new Date(dayString)

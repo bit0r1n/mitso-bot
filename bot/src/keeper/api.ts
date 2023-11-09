@@ -7,12 +7,21 @@ export class Keeper extends BaseApi {
   }
 
   async getWeeks(options: WeeksSearchOptions): Promise<Date[]> {
-    const query = new URLSearchParams({
-      group: options.group
-    })
+    const query = new URLSearchParams()
+
+    if (options?.group) {
+      query.set('group', options.group)
+    }
+
+    if (options?.teachers) {
+      (Array.isArray(options.teachers) ? options.teachers : [ options.teachers ])
+        .forEach(teacher => query.append('teachers', teacher))
+    }
+
     if (options.from) {
       query.set('from', options.from.toISOString())
     }
+
     return (await this.request<string[]>('weeks', query))
       .map(date => new Date(date))
   }

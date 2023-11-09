@@ -57,42 +57,42 @@ bot.start(async ctx => {
   const state: UserState = ctx.user.state
 
   switch (state) {
-    case UserState.MainMenu: {
-      await ctx.reply('🍉 Хватай меню', {
-        reply_markup: keyboards[state].resize().reply_markup
-      })
-      return
-    }
-    case UserState.AskingGroup: {
-      await ctx.reply('🍆 Погоди, я пока жду от тебя номер группы', {
-        reply_markup: keyboards[state].resize().reply_markup
-      })
-      return
-    }
-    case UserState.ChoosingGroup: {
-      await ctx.reply('👞 Выбери группу', {
-        reply_markup: batchButtons(
+  case UserState.MainMenu: {
+    await ctx.reply('🍉 Хватай меню', {
+      reply_markup: keyboards[state].resize().reply_markup
+    })
+    return
+  }
+  case UserState.AskingGroup: {
+    await ctx.reply('🍆 Погоди, я пока жду от тебя номер группы', {
+      reply_markup: keyboards[state].resize().reply_markup
+    })
+    return
+  }
+  case UserState.ChoosingGroup: {
+    await ctx.reply('👞 Выбери группу', {
+      reply_markup: batchButtons(
           ctx.user.choosing_groups!
             .map(g => Markup.button.callback(
               g.display!,
               callbackIdBuild('select_group', [ g.id! ])
             ))
-        ).reply_markup
-      })
-      return
-    }
-    case UserState.AskingWeekGroup: {
-      await ctx.reply('🥥 Напиши номер группы, распиание которой ты хочешь узнать', {
-        reply_markup: keyboards[state].resize().reply_markup
-      })
-      return
-    }
-    case UserState.AskingWeekTeacher: {
-      await ctx.reply('📛 Напиши инициалы преподавателя, расписание которого ты хочешь узнать', {
-        reply_markup: keyboards[state].resize().reply_markup
-      })
-      return
-    }
+      ).reply_markup
+    })
+    return
+  }
+  case UserState.AskingWeekGroup: {
+    await ctx.reply('🥥 Напиши номер группы, распиание которой ты хочешь узнать', {
+      reply_markup: keyboards[state].resize().reply_markup
+    })
+    return
+  }
+  case UserState.AskingWeekTeacher: {
+    await ctx.reply('📛 Напиши инициалы преподавателя, расписание которого ты хочешь узнать', {
+      reply_markup: keyboards[state].resize().reply_markup
+    })
+    return
+  }
   }
 })
 
@@ -180,9 +180,9 @@ bot.hears('Другие расписания', async (ctx) => {
     parse_mode: 'MarkdownV2',
     reply_markup: Markup.inlineKeyboard([
       [ Markup.button.callback(
-          'Преподаватель', callbackIdBuild('teacher_week')),
-        Markup.button.callback(
-          'Группа', callbackIdBuild('group_week')) ]
+        'Преподаватель', callbackIdBuild('teacher_week')),
+      Markup.button.callback(
+        'Группа', callbackIdBuild('group_week')) ]
     ]).reply_markup
   })
 })
@@ -258,7 +258,7 @@ bot.on(callbackQuery('data'), async (ctx) => {
           (e as Error).message === 'Group not found'
             ? '🥲 Группа не найдена'
             : '🤯 Произошла какая-то ошибка'
-          )
+        )
         return
       }
     }
@@ -288,7 +288,7 @@ bot.on(callbackQuery('data'), async (ctx) => {
       lessonsToMessage(lessons)
     ].join('\n'))
   } else if (command === 'teacher_week') {
-    const [ teacherName ] = args
+    const [ teacherName, weekStartRaw ] = args
 
     if (!teacherName) {
       ctx.user.state = UserState.AskingWeekTeacher
@@ -302,14 +302,40 @@ bot.on(callbackQuery('data'), async (ctx) => {
       })
 
       await ctx.editMessageText('🧄 Напиши инициалы преподавателя или его часть\n\nОбычно они в формате Фамилия И. О.')
-    } else {
+    } else if (!weekStartRaw) {
       const weekStartDate = new Date()
       weekStartDate.setTime(weekStartDate.getTime() + (3 * 60 ** 2 * 1e3))
 
       const weekStart = getWeekStart(weekStartDate)
 
-      const weekEnd = new Date(weekStart)
-      weekEnd.setTime(weekEnd.getTime() + (7 * 24 * 60 ** 2 * 1e3))
+      const weeks = await keeper.getWeeks({
+        from: weekStart,
+        teachers: teacherName
+      })
+
+      if (!weeks.length) {
+        await ctx.answerCbQuery()
+        await ctx.editMessageReplyMarkup(Markup.inlineKeyboard([ [] ]).reply_markup)
+        await ctx.reply('🧉 Кажется кто-то конкретно кайфует')
+        return
+      }
+
+      const buttons = batchButtons(
+        weeks.map((week) =>
+          Markup.button.callback(
+            weekToHuman(week),
+            callbackIdBuild('teacher_week', [ teacherName, dateToCallback(week) ])
+          )
+        ),
+        3
+      )
+
+      await ctx.editMessageText('🚸 Выбери неделю')
+      await ctx.editMessageReplyMarkup(buttons.reply_markup)
+    } else {
+      const weekStart = new Date(weekStartRaw)
+      const weekEnd = new Date(weekStartRaw)
+      weekEnd.setTime(weekStart.getTime() + (7 * 24 * 60 ** 2 * 1e3))
 
       const lessons = await keeper.getLessons({
         teachers: [ teacherName ],
@@ -320,7 +346,7 @@ bot.on(callbackQuery('data'), async (ctx) => {
       if (!lessons.length) {
         await ctx.answerCbQuery()
         await ctx.editMessageReplyMarkup(Markup.inlineKeyboard([ [] ]).reply_markup)
-        await ctx.editMessageText('🪤 Кажется кто-то кайфует на этой неделе')
+        await ctx.editMessageText('🪤 Емае, неловко как-то вышло)') // неделя нашлась, но нет расписния. в принципе невозможно, но все же
         return
       }
 
@@ -328,13 +354,20 @@ bot.on(callbackQuery('data'), async (ctx) => {
 
       const groups = await parser.getGroups()
 
+      const currentDate = new Date()
+      currentDate.setTime(currentDate.getTime() + (3 * 60 ** 2 * 1e3))
+      const diff = weekStart.getTime() - currentDate.getTime()
+      const weekDiff = Math.ceil(diff / (7 * 24 * 60 ** 2 * 1e3))
+
+      const target = weekDiff === 0 ? 'текущую неделю' : `${weekDiff + 1} неделю`
+
       await ctx.editMessageText([
-        `Распиание на неделю у ${teacherName}`,
+        `Распиание на ${target} у ${teacherName}`,
         lessonsToMessage(lessons, groups)
       ].join('\n'))
     }
   } else if (command === 'group_week') {
-    const [ groupId ] = args
+    const [ groupId, weekStartRaw ] = args
 
     if (!groupId) {
       ctx.user.state = UserState.AskingWeekGroup
@@ -348,7 +381,7 @@ bot.on(callbackQuery('data'), async (ctx) => {
       })
 
       await ctx.editMessageText('🥕 Напиши номер группы для поиска расписания')
-    } else {
+    } else if (!weekStartRaw) {
       let group: Group
       try {
         group = await parser.getGroup(groupId)
@@ -368,8 +401,48 @@ bot.on(callbackQuery('data'), async (ctx) => {
 
       const weekStart = getWeekStart(weekStartDate)
 
-      const weekEnd = new Date(weekStart)
-      weekEnd.setTime(weekEnd.getTime() + (7 * 24 * 60 ** 2 * 1e3))
+      const weeks = await keeper.getWeeks({
+        from: weekStart,
+        group: groupId
+      })
+
+      if (!weeks.length) {
+        await ctx.answerCbQuery()
+        await ctx.editMessageReplyMarkup(Markup.inlineKeyboard([ [] ]).reply_markup)
+        await ctx.reply(`🫠 Чувачки из ${group.display} на кайфах`)
+        return
+      }
+
+      const buttons = batchButtons(
+        weeks.map((week) =>
+          Markup.button.callback(
+            weekToHuman(week),
+            callbackIdBuild('group_week', [ groupId, dateToCallback(week) ])
+          )
+        ),
+        3
+      )
+
+      await ctx.editMessageText('🛗 Выбери неделю')
+      await ctx.editMessageReplyMarkup(buttons.reply_markup)
+    } else {
+      let group: Group
+      try {
+        group = await parser.getGroup(groupId)
+      } catch (e) {
+        await ctx.answerCbQuery()
+        await ctx.editMessageReplyMarkup(Markup.inlineKeyboard([ [] ]).reply_markup)
+        await ctx.editMessageText(
+          (e as Error).message === 'Group not found'
+            ? '😭 Группа не найдена'
+            : '📸 Произошла какая-то ошибка'
+        )
+        return
+      }
+
+      const weekStart = new Date(weekStartRaw)
+      const weekEnd = new Date(weekStartRaw)
+      weekEnd.setTime(weekStart.getTime() + (7 * 24 * 60 ** 2 * 1e3))
 
       const lessons = await keeper.getLessons({
         group: groupId,
@@ -379,13 +452,22 @@ bot.on(callbackQuery('data'), async (ctx) => {
 
       if (!lessons.length) {
         await ctx.answerCbQuery()
+        await ctx.editMessageReplyMarkup(Markup.inlineKeyboard([ [] ]).reply_markup)
         await ctx.editMessageText(`🥥 Распиания на неделю для ${group.display} нету`)
         return
       }
-    
+
       await ctx.answerCbQuery()
+
+      const currentDate = new Date()
+      currentDate.setTime(currentDate.getTime() + (3 * 60 ** 2 * 1e3))
+      const diff = weekStart.getTime() - currentDate.getTime()
+      const weekDiff = Math.ceil(diff / (7 * 24 * 60 ** 2 * 1e3))
+
+      const target = weekDiff === 0 ? 'текущую неделю' : `${weekDiff + 1} неделю`
+
       await ctx.editMessageText([
-        `Распиание на неделю для ${group.display}`,
+        `Распиание на ${target} для ${group.display}`,
         lessonsToMessage(lessons)
       ].join('\n'))
     }
