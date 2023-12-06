@@ -3,6 +3,7 @@ import { lessonToScheme } from '../api/helpers'
 import { Day } from '../api/interfaces'
 import { Lesson } from '../schemas/Lesson'
 import { Teacher } from '../schemas/Teacher'
+import { getWeekStart } from '../utils/getWeekStart'
 
 export async function parseJob() {
   const parser = new Parser()
@@ -38,6 +39,10 @@ export async function parseJob() {
         continue
       }
 
+      const weekStart = getWeekStart(schedule[0].lessons[0].date)
+      const weekEnd = new Date(weekStart)
+      weekEnd.setDate(weekEnd.getDate() + 7)
+
       const lessons = schedule.map(day => day.lessons).flat(1)
       const lessonsDocuments = lessons.map(lesson => new Lesson(lessonToScheme(lesson, group.id)))
 
@@ -47,22 +52,16 @@ export async function parseJob() {
 
       lessons.splice(0, lessons.length)
 
-      const sameLessons = await Lesson.find({
+      await Lesson.deleteMany({
+        group: group.id,
         date: {
-          $in: lessonsDocuments.map(l => l.date)
-        },
-        group: group.id
+          $gte: weekStart,
+          $lt: weekEnd
+        }
       })
 
-      if (sameLessons.length) {
-        for (const lesson of sameLessons) {
-          await lesson.deleteOne()
-        }
-
-        sameLessons.splice(0, sameLessons.length)
-      }
-
       await Lesson.insertMany(lessonsDocuments)
+
       lessonsDocuments.splice(0, lessonsDocuments.length)
     }
 
