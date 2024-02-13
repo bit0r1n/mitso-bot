@@ -564,6 +564,12 @@ if (process.env.NODE_ENV === 'production') {
     parseInt(process.env.WEBHOOK_SERVER_PORT) :
     3000
 
+  console.log(
+    'Startin bot in WEBHOOK MODE, startin server %s, Telegram will know as %s',
+    `http://localhost:${webhookServerPort}${webhookPath}`,
+    `${webhookDomain}${webhookPath}`
+  )
+
   await bot.launch({
     webhook: {
       domain: process.env.WEBHOOK_DOMAIN!,
@@ -572,13 +578,7 @@ if (process.env.NODE_ENV === 'production') {
       secretToken
     }
   })
-
-  console.log(
-    'Started bot in WEBHOOK MODE, started server %s, Telegram know as %s',
-    `http://localhost:${webhookServerPort}${webhookPath}`,
-    `${webhookDomain}${webhookPath}`
-  )
 } else {
+  console.log('Startin bot in POLLING MODE')
   await bot.launch()
-  console.log('Started bot in POLLING MODE')
 }
