@@ -552,9 +552,7 @@ bot.on(message('text'), async (ctx) => {
   }
 })
 
-if (process.env.NODE_ENV === 'production') {
-  if (!('WEBHOOK_DOMAIN' in process.env)) throw new Error('"WEBHOOK_DOMAIN" variable not found')
-
+if ('WEBHOOK_DOMAIN' in process.env) {
   const secretToken = process.env.WEBHOOK_SECRET?.length ? process.env.WEBHOOK_SECRET : createSecret()
   const webhookDomain = process.env.WEBHOOK_DOMAIN!
   const webhookPath = process.env.WEBHOOK_PATH?.length ?
