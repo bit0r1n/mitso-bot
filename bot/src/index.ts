@@ -556,19 +556,29 @@ if (process.env.NODE_ENV === 'production') {
   if (!('WEBHOOK_DOMAIN' in process.env)) throw new Error('"WEBHOOK_DOMAIN" variable not found')
 
   const secretToken = process.env.WEBHOOK_SECRET?.length ? process.env.WEBHOOK_SECRET : createSecret()
+  const webhookDomain = process.env.WEBHOOK_DOMAIN!
+  const webhookPath = process.env.WEBHOOK_PATH?.length ?
+    process.env.WEBHOOK_PATH :
+    `/telegraf/${bot.secretPathComponent()}`
+  const webhookServerPort = process.env.WEBHOOK_SERVER_PORT?.length ?
+    parseInt(process.env.WEBHOOK_SERVER_PORT) :
+    3000
 
   await bot.launch({
     webhook: {
       domain: process.env.WEBHOOK_DOMAIN!,
-      port: process.env.WEBHOOK_SERVER_PORT?.length ?
-        parseInt(process.env.WEBHOOK_SERVER_PORT) :
-        3000,
-      hookPath: process.env.WEBHOOK_PATH?.length ?
-        process.env.WEBHOOK_PATH :
-        undefined,
+      port: webhookServerPort,
+      hookPath: webhookPath,
       secretToken
     }
   })
+
+  console.log(
+    'Started bot in WEBHOOK MODE, started server %s, Telegram know as %s',
+    `http://localhost:${webhookServerPort}${webhookPath}`,
+    `${webhookDomain}${webhookPath}`
+  )
 } else {
   await bot.launch()
+  console.log('Started bot in POLLING MODE')
 }
