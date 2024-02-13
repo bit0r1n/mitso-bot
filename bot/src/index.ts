@@ -570,7 +570,7 @@ if ('WEBHOOK_DOMAIN' in process.env) {
 
   await bot.launch({
     webhook: {
-      domain: process.env.WEBHOOK_DOMAIN!,
+      domain: webhookDomain,
       port: webhookServerPort,
       hookPath: webhookPath,
       secretToken

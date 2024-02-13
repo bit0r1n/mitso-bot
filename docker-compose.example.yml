@@ -32,9 +32,6 @@ services:
       - MONGO_URL=mongodb://mongo:27017
       - PARSER_URL=http://parser:3000
       - KEEPER_URL=http://keeper:3000
-      - NODE_ENV=production
-      - WEBHOOK_DOMAIN=${WEBHOOK_DOMAIN}
-      - WEBHOOK_PATH=${WEBHOOK_PATH}
     depends_on:
       parser:
         condition: service_healthy
