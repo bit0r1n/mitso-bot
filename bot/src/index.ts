@@ -8,6 +8,7 @@ import { Keeper } from './keeper/api'
 import { callbackQuery, message } from 'telegraf/filters'
 import { getWeekStart, lessonsToMessage, weekToHuman } from './keeper/helpers'
 import { Group } from './parser/interfaces'
+import { createSecret } from './utils/createSecret'
 
 [ 'BOT_TOKEN', 'MONGO_URL', 'PARSER_URL', 'KEEPER_URL' ].every(key => {
   if (!process.env[key])
@@ -551,4 +552,23 @@ bot.on(message('text'), async (ctx) => {
   }
 })
 
-await bot.launch()
+if (process.env.NODE_ENV === 'production') {
+  if (!('WEBHOOK_DOMAIN' in process.env)) throw new Error('"WEBHOOK_DOMAIN" variable not found')
+
+  const secretToken = process.env.WEBHOOK_SECRET?.length ? process.env.WEBHOOK_SECRET : createSecret()
+
+  await bot.launch({
+    webhook: {
+      domain: process.env.WEBHOOK_DOMAIN!,
+      port: process.env.WEBHOOK_SERVER_PORT?.length ?
+        parseInt(process.env.WEBHOOK_SERVER_PORT) :
+        3000,
+      hookPath: process.env.WEBHOOK_PATH?.length ?
+        process.env.WEBHOOK_PATH :
+        undefined,
+      secretToken
+    }
+  })
+} else {
+  await bot.launch()
+}
