@@ -9,6 +9,9 @@ import { callbackQuery, message } from 'telegraf/filters'
 import { getWeekStart, lessonsToMessage, weekToHuman } from './keeper/helpers'
 import { Group } from './parser/interfaces'
 import { createSecret } from './utils/createSecret'
+import { hearsCommands } from './commands/hears'
+import { CommandUtils } from './utils/commandHelpers'
+import { slashCommands } from './commands/slash'
 
 [ 'BOT_TOKEN', 'MONGO_URL', 'PARSER_URL', 'KEEPER_URL' ].every(key => {
   if (!process.env[key])
@@ -20,6 +23,13 @@ await mongoose.connect(process.env.MONGO_URL!)
 const bot = new Telegraf<SuperDuperUpgradedContext>(process.env.BOT_TOKEN!)
 const parser = new Parser(process.env.PARSER_URL!)
 const keeper = new Keeper(process.env.KEEPER_URL!)
+
+const commandUtilsObject: CommandUtils = {
+  parser,
+  keeper
+}
+const registeredHearsCommands = hearsCommands.map((c) => new c(commandUtilsObject))
+const registeredSlashCommands = slashCommands.map((c) => new c(commandUtilsObject))
 
 bot.use(async (ctx, next) => {
   if (!ctx.from) return
@@ -48,167 +58,14 @@ bot.use(async (ctx, next) => {
   return next()
 })
 
-bot.start(async ctx => {
-  if (ctx.newUser) {
-    await ctx.reply('🍉 Привет, я могу тебе показывать расписание!\nТолько мне для этого нужно знать твою группу 😫')
-    await ctx.reply('🤨 Давай найдем твою группу. Напиши её номер')
-    return
-  }
+for (const command of registeredSlashCommands) {
+  bot.command(command.triggers, command.execute.bind(command))
+}
 
-  const state: UserState = ctx.user.state
-
-  switch (state) {
-  case UserState.MainMenu: {
-    await ctx.reply('🍉 Хватай меню', {
-      reply_markup: keyboards[state].resize().reply_markup
-    })
-    return
-  }
-  case UserState.AskingGroup: {
-    await ctx.reply('🍆 Погоди, я пока жду от тебя номер группы', {
-      reply_markup: keyboards[state].resize().reply_markup
-    })
-    return
-  }
-  case UserState.ChoosingGroup: {
-    await ctx.reply('👞 Выбери группу', {
-      reply_markup: batchButtons(
-          ctx.user.choosing_groups!
-            .map(g => Markup.button.callback(
-              g.display!,
-              callbackIdBuild('select_group', [ g.id! ])
-            ))
-      ).reply_markup
-    })
-    return
-  }
-  case UserState.AskingWeekGroup: {
-    await ctx.reply('🥥 Напиши номер группы, распиание которой ты хочешь узнать', {
-      reply_markup: keyboards[state].resize().reply_markup
-    })
-    return
-  }
-  case UserState.AskingWeekTeacher: {
-    await ctx.reply('📛 Напиши инициалы преподавателя, расписание которого ты хочешь узнать', {
-      reply_markup: keyboards[state].resize().reply_markup
-    })
-    return
-  }
-  }
-})
-
-bot.hears(/^иди|пош(е|ё)л нахуй/i, async (ctx) => {
-  await ctx.reply('сам иди') // @krosbite
-})
-
-bot.hears([ 'Сегодня', 'Завтра' ], async (ctx) => {
-  if (ctx.user.state !== UserState.MainMenu) return
-
-  const extraTime = ctx.message.text === 'Завтра' ? 24 * 60 ** 2 * 1e3 : 0
-
-  const todayStart = new Date()
-  todayStart.setTime(todayStart.getTime() + (3 * 60 ** 2 * 1e3) + extraTime)
-  todayStart.setHours(0, 0, 0, 0)
-
-  const tomorrowStart = new Date()
-  tomorrowStart.setTime(todayStart.getTime() + (24 * 60 ** 2 * 1e3))
-  tomorrowStart.setHours(0, 0, 0, 0)
-
-  const lessons = await keeper.getLessons({
-    group: ctx.user.group!.id,
-    from: todayStart,
-    before: tomorrowStart
-  })
-
-  if (!lessons.length) {
-    await ctx.reply(`🤩 На ${ctx.message.text.toLowerCase()} нет занятий`)
-    return
-  }
-  await ctx.reply([
-    `Расписание ${ctx.user.group!.display} на ${ctx.message.text.toLowerCase()}`,
-    lessonsToMessage(lessons)
-  ].join('\n'))
-})
-
-bot.hears('Неделя', async (ctx) => {
-  if (ctx.user.state !== UserState.MainMenu) return
-
-  const weekStartDate = new Date()
-  weekStartDate.setTime(weekStartDate.getTime() + (3 * 60 ** 2 * 1e3))
-
-  const weekStart = getWeekStart(weekStartDate)
-
-  const weeks = await keeper.getWeeks({
-    group: ctx.user.group!.id!,
-    from: weekStart
-  })
-
-  if (!weeks.length) {
-    await ctx.reply('🌴 Недель с занятиями не нашлось')
-    return
-  }
-
-  const buttons = batchButtons(
-    weeks.map((week, i) =>
-      Markup.button.callback(
-        weekToHuman(week),
-        callbackIdBuild('week', [ `${i}`, dateToCallback(week) ])
-      )),
-    3,
-    // [ [ Markup.button.callback('🚽 Архив недель', callbackIdBuild('week', [ 'archive' ])) ] ]
-  )
-
-  await ctx.reply('🧦 Выбери неделю', {
-    reply_markup: buttons.reply_markup
-  })
-})
-
-bot.hears('Сменить группу', async (ctx) => {
-  if (ctx.user.state !== UserState.MainMenu) return
-
-  ctx.user.state = UserState.AskingGroup
-  await ctx.user.save()
-
-  await ctx.reply('👡 Введи номер группы', {
-    reply_markup: Markup.removeKeyboard().reply_markup
-  })
-})
-
-bot.hears('Другие расписания', async (ctx) => {
-  if (ctx.user.state !== UserState.MainMenu) return
-
-  await ctx.reply('🥾 Выбери какое расписание тебе нужно', {
-    parse_mode: 'MarkdownV2',
-    reply_markup: Markup.inlineKeyboard([
-      [ Markup.button.callback(
-        'Преподаватель', callbackIdBuild('teacher_week')),
-      Markup.button.callback(
-        'Группа', callbackIdBuild('group_week')) ]
-    ]).reply_markup
-  })
-})
-
-bot.hears('Отмена', async (ctx) => {
-  if (ctx.user.state === UserState.ChoosingGroup) {
-    if (!ctx.user.group || !Object.values(ctx.user.group).filter(Boolean).length) {
-      await ctx.reply('😳 Нее, без группы мы не начинаем')
-    } else {
-      ctx.user.state = UserState.MainMenu
-      await ctx.user.save()
-
-      await ctx.reply('🫠 ладн', {
-        reply_markup: keyboards[ctx.user.state].resize().reply_markup
-      })
-    }
-  } else if ([ UserState.AskingWeekTeacher, UserState.AskingWeekGroup ].includes(ctx.user.state)) {
-    ctx.user.state = UserState.MainMenu
-    await ctx.user.save()
-
-    await ctx.reply('👍 (ок (👍))', {
-      reply_markup: keyboards[ctx.user.state].resize().reply_markup
-    })
-  }
-})
+for (const command of registeredHearsCommands) {
+  console.log('Registering HEARS with "%s" triggers', command.triggers)
+  bot.hears(command.triggers, command.execute.bind(command))
+}
 
 bot.on(callbackQuery('data'), async (ctx) => {
   const [ command, ...args ] = ctx.callbackQuery.data.split(CallbackIdSplitter)

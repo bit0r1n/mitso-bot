@@ -44,10 +44,12 @@ app.get('/parse_job', async (req, res) => {
   res.status(202).json({ result: 'Accepted' })
 
   parseJobRunning = true
-  await parseJob()
-  // await Bun.sleep(parseJobCooldown)
-  parseJobRunning = false
-  // parseJobWaitingStart = Date.now()
+
+  try {
+    await parseJob()
+  } finally {
+    parseJobRunning = false
+  }
 })
 
 app.get('/weeks', async (req, res) => {
