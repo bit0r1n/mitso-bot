@@ -10,8 +10,6 @@ export class DayScheduleCommand extends AbstractHearsCommand {
   async execute(ctx: CommandContext) {
     if (ctx.user.state !== UserState.MainMenu) return
 
-    console.log(this)
-
     const { keeper } = this.utils
 
     const extraTime = ctx.message.text === 'Завтра' ? 24 * 60 ** 2 * 1e3 : 0
