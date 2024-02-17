@@ -26,4 +26,4 @@ jobs:
               ProxyCommand cloudflared access ssh --hostname %h --id ${{ secrets.DEPLOY_AUTH_ID }} --secret ${{ secrets.DEPLOY_AUTH_SECRET }}
       - name: Deploy bot
         run: |
-          ssh ${{ secrets.DEPLOY_USERNAME }}@${{ secrets.DEPLOY_HOST }} "cd mitso-bot && git pull && docker compose up -d --build && exit"
+          ssh ${{ secrets.DEPLOY_USERNAME }}@${{ secrets.DEPLOY_HOST }} "cd mitso-bot && git pull && docker compose -f docker-compose.prod.yml up -d --build && exit"

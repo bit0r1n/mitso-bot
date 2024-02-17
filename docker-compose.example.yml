@@ -41,6 +41,7 @@ services:
         condition: service_started
   cron:
     build: ./cron
+    restart: always
     depends_on:
       keeper:
         condition: service_started
