@@ -3,5 +3,6 @@
 
 data
 act
+.idea
 
 docker-compose.prod.yml

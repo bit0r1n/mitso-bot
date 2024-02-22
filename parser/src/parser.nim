@@ -1,9 +1,9 @@
 import strutils, asyncdispatch, asynchttpserver, json, tables, uri, sequtils, options
-import mitso/[parser, helpers, typedefs]
+import mitso/[schedule, helpers, typedefs]
 import jester
 import helpers, errors
 
-var mitsoParser {.threadvar.}: Site
+var mitsoParser {.threadvar.}: ScheduleSite
 
 router parserRouter:
   get "/":
@@ -111,7 +111,7 @@ router parserRouter:
     )
 
 proc main() {.async.} =
-  mitsoParser = newSite()
+  mitsoParser = newScheduleSite()
   echo "Loading groups..."
   discard await mitsoParser.loadGroups()
 
