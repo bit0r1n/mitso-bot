@@ -30,7 +30,7 @@ export class WeekScheduleCommand extends AbstractHearsCommand {
     }
 
     const buttons = batchButtons(
-      weeks.map((week, i) =>
+      weeks.sort((a, b) => a.getTime() - b.getTime()).map((week, i) =>
         Markup.button.callback(
           weekToHuman(week),
           callbackIdBuild('week', [ `${i}`, dateToCallback(week) ])

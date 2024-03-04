@@ -179,7 +179,7 @@ bot.on(callbackQuery('data'), async (ctx) => {
       }
 
       const buttons = batchButtons(
-        weeks.map((week) =>
+        weeks.sort((a, b) => a.getTime() - b.getTime()).map((week) =>
           Markup.button.callback(
             weekToHuman(week),
             callbackIdBuild('teacher_week', [ teacherName, dateToCallback(week) ])
@@ -272,7 +272,7 @@ bot.on(callbackQuery('data'), async (ctx) => {
       }
 
       const buttons = batchButtons(
-        weeks.map((week) =>
+        weeks.sort((a, b) => a.getTime() - b.getTime()).map((week) =>
           Markup.button.callback(
             weekToHuman(week),
             callbackIdBuild('group_week', [ groupId, dateToCallback(week) ])
