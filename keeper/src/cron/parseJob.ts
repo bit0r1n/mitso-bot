@@ -39,6 +39,8 @@ export async function parseJob() {
         continue
       }
 
+      if (!schedule.length) continue
+
       const weekStart = getWeekStart(schedule[0].lessons[0].date)
       const weekEnd = new Date(weekStart)
       weekEnd.setDate(weekEnd.getDate() + 7)
