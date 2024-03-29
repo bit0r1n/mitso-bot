@@ -39,6 +39,7 @@ jobs:
           tags: ${{ secrets.REGISTRY }}/${{ matrix.image }}:${{ github.ref_name }},${{ secrets.REGISTRY }}/${{ matrix.image }}:latest
   deploy:
     runs-on: ubuntu-latest
+    needs: build
     steps:
       - name: Install cloudflared
         run: |
