@@ -129,8 +129,16 @@ export const lessonsToMessage = (lessons: Lesson[], groups?: Group[]): string =>
   return days.join('\n\n')
 }
 
-export const weekToHuman = (weekStart: Date, from = getWeekStart()): string => {
+export const weekToHuman = (weekStart: Date, from = getWeekStart(), incrementDay = false): string => {
   const diff = weekStart.getTime() - from.getTime()
   const weekDiff = Math.ceil(diff / (7 * 24 * 60 ** 2 * 1e3))
-  return weekDiff === 0 ? 'Текущая неделя' : `${weekDiff + 1} неделя`
+
+  if (weekDiff >= 0)
+    return weekDiff === 0 ? 'Текущая неделя' : `${weekDiff + 1} неделя`
+  else {
+    if (incrementDay) weekStart.setDate(weekStart.getDate() + 1)
+    return `${weekStart.getDate().toString().padStart(2, '0')}.` +
+      `${(weekStart.getMonth() + 1).toString().padStart(2, '0')}.` +
+      `${weekStart.getUTCFullYear()}`
+  }
 }

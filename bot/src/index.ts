@@ -2,7 +2,13 @@ import { Markup, Telegraf } from 'telegraf'
 import * as mongoose from 'mongoose'
 import { SuperDuperUpgradedContext } from './utils/context'
 import { User, UserState } from './schemas/User'
-import { CallbackIdSplitter, batchButtons, callbackIdBuild, dateToCallback, keyboards } from './utils/keyboards'
+import {
+  batchButtons,
+  callbackIdBuild,
+  dateToCallback,
+  keyboards,
+  callbackIdParse, WeeksArchiveAction, WeeksArchiveType
+} from './utils/keyboards'
 import { Parser } from './parser/api'
 import { Keeper } from './keeper/api'
 import { callbackQuery, message } from 'telegraf/filters'
@@ -12,6 +18,8 @@ import { createSecret } from './utils/createSecret'
 import { hearsCommands } from './commands/hears'
 import { CommandUtils } from './utils/commandHelpers'
 import { slashCommands } from './commands/slash'
+import { batchArray } from './utils/array'
+import { InlineKeyboardButton } from 'telegraf/types'
 
 [ 'BOT_TOKEN', 'MONGO_URL', 'PARSER_URL', 'KEEPER_URL' ].every(key => {
   if (!process.env[key])
@@ -68,7 +76,7 @@ for (const command of registeredHearsCommands) {
 }
 
 bot.on(callbackQuery('data'), async (ctx) => {
-  const [ command, ...args ] = ctx.callbackQuery.data.split(CallbackIdSplitter)
+  const [ command, ...args ] = callbackIdParse(ctx.callbackQuery.data)
 
   if (command === 'select_group') {
     const group = ctx.user.choosing_groups!.find(g => g.id === args[0])
@@ -93,13 +101,145 @@ bot.on(callbackQuery('data'), async (ctx) => {
     })
     return
   } else if (command === 'week') {
-    const [ weekId, weekStartRaw, groupId ] = args
+    const [ weekId ] = args
 
     if (weekId === 'archive') {
-      // TODO: weeks -> view archive
-      await ctx.answerCbQuery()
+      const [ , entityType, entityId, week, action, pageString ] = args
+
+      if (!week && !action) {
+        const weeks = await keeper.getWeeks({
+          teachers: entityType === WeeksArchiveType.Teacher ? entityId : undefined,
+          group: entityType === WeeksArchiveType.Group ? entityId : undefined,
+          before: getWeekStart()
+        })
+
+        const batchedWeeks = batchArray(
+          weeks.sort((a, b) => b.getTime() - a.getTime()), 9)
+
+        const extraRows: InlineKeyboardButton[][] = []
+
+        if (batchedWeeks.length > 1) extraRows.push([
+          Markup.button.callback('▶️',
+            callbackIdBuild('week', [
+              'archive', entityType,
+              entityId, dateToCallback(batchedWeeks[1][0]), WeeksArchiveAction.ShowPage, '1' ]))
+        ])
+
+        const buttons = batchButtons(
+          batchedWeeks[0].map((week) =>
+            Markup.button.callback(
+              weekToHuman(week, getWeekStart(), true),
+              callbackIdBuild('week', [ 'archive', entityType,
+                entityId, dateToCallback(week),
+                WeeksArchiveAction.GetLessons ])
+            )),
+          3,
+          extraRows
+        )
+
+        await ctx.editMessageText('🧦 Выбери неделю')
+        await ctx.editMessageReplyMarkup(buttons.reply_markup)
+      }
+
+      switch (action) {
+      case WeeksArchiveAction.GetLessons: {
+        const weekStart = new Date(week)
+        const weekEnd = new Date(week)
+        weekEnd.setTime(weekStart.getTime() + (7 * 24 * 60 ** 2 * 1e3))
+
+        let groupName: string
+
+        try {
+          groupName = entityType === WeeksArchiveType.Teacher
+            ? entityId
+            : (await parser.getGroup(entityId)).display
+        } catch (e) {
+          await ctx.editMessageText(
+            (e as Error).message === 'Group not found'
+              ? '🥲 Группа не найдена'
+              : '🤯 Произошла какая-то ошибка'
+          )
+          return
+        }
+
+        const lessons = await keeper.getLessons({
+          group: entityType === WeeksArchiveType.Group ? entityId : undefined,
+          teachers: entityType === WeeksArchiveType.Teacher ? entityId : undefined,
+          from: weekStart,
+          before: weekEnd
+        })
+
+        const target = weekToHuman(weekStart, new Date())
+
+        if (!lessons.length) {
+          await ctx.editMessageText(`🤯 Распиания на неделю с ${target} нету`)
+          return
+        }
+
+        const groups = entityType === WeeksArchiveType.Teacher
+          ? (await parser.getGroups())
+          : undefined
+
+        await ctx.editMessageText([
+          `Расписание ${groupName} на неделю с ${target}`,
+          lessonsToMessage(lessons, groups)
+        ].join('\n'))
+
+        break
+      }
+      case WeeksArchiveAction.ShowPage: {
+        const page = parseInt(pageString)
+        const weeks = await keeper.getWeeks({
+          group: entityType === WeeksArchiveType.Group ? entityId : undefined,
+          teachers: entityType === WeeksArchiveType.Teacher ? entityId : undefined,
+          before: getWeekStart()
+        })
+
+        const batchedWeeks = batchArray(
+          weeks.sort((a, b) => b.getTime() - a.getTime()), 9)
+
+        const extraRows: InlineKeyboardButton[][] = [ [] ]
+
+        if (page !== 0) extraRows[0].push(
+          Markup.button.callback('◀️',
+            callbackIdBuild('week', [
+              'archive', entityType,
+              entityId, dateToCallback(batchedWeeks[1][0]),
+              WeeksArchiveAction.ShowPage, `${page - 1}`
+            ])
+          )
+        )
+
+        if (page < batchedWeeks.length - 1) extraRows[0].push(
+          Markup.button.callback('▶️',
+            callbackIdBuild('week', [
+              'archive', entityType,
+              entityId, dateToCallback(batchedWeeks[1][0]),
+              WeeksArchiveAction.ShowPage, `${page + 1}`
+            ])
+          )
+        )
+
+        const buttons = batchButtons(
+          batchedWeeks[page].map((week) =>
+            Markup.button.callback(
+              weekToHuman(week, getWeekStart(), true),
+              callbackIdBuild('week', [ 'archive', entityType, entityId,
+                dateToCallback(week), WeeksArchiveAction.GetLessons ]
+              )
+            )),
+          3,
+          extraRows
+        )
+
+        await ctx.editMessageReplyMarkup(buttons.reply_markup)
+        break
+      }
+      }
       return
     }
+
+    const [ , weekStartRaw, groupId ] = args
 
     const weekStart = new Date(weekStartRaw)
     const weekEnd = new Date(weekStartRaw)
@@ -167,9 +307,11 @@ bot.on(callbackQuery('data'), async (ctx) => {
       const weekStart = getWeekStart(weekStartDate)
 
       const weeks = await keeper.getWeeks({
-        from: weekStart,
+        // from: weekStart,
         teachers: teacherName
       })
+
+      const actualWeeks = weeks.filter(w => w.getTime() >= weekStart.getTime())
 
       if (!weeks.length) {
         await ctx.answerCbQuery()
@@ -179,13 +321,17 @@ bot.on(callbackQuery('data'), async (ctx) => {
       }
 
       const buttons = batchButtons(
-        weeks.sort((a, b) => a.getTime() - b.getTime()).map((week) =>
+        actualWeeks.sort((a, b) => a.getTime() - b.getTime()).map((week) =>
           Markup.button.callback(
             weekToHuman(week),
             callbackIdBuild('teacher_week', [ teacherName, dateToCallback(week) ])
           )
         ),
-        3
+        3,
+        weeks.length !== actualWeeks.length
+          ? [ [ Markup.button.callback('🚽 Архив недель', callbackIdBuild(
+            'week', [ 'archive', WeeksArchiveType.Teacher, teacherName ])) ] ]
+          : []
       )
 
       await ctx.editMessageText('🚸 Выбери неделю')
@@ -260,25 +406,29 @@ bot.on(callbackQuery('data'), async (ctx) => {
       const weekStart = getWeekStart(weekStartDate)
 
       const weeks = await keeper.getWeeks({
-        from: weekStart,
         group: groupId
       })
 
+      const actualWeeks = weeks.filter(w => w.getTime() >= weekStart.getTime())
+
       if (!weeks.length) {
-        await ctx.answerCbQuery()
         await ctx.editMessageReplyMarkup(Markup.inlineKeyboard([ [] ]).reply_markup)
         await ctx.reply(`🫠 Чувачки из ${group.display} на кайфах`)
         return
       }
 
       const buttons = batchButtons(
-        weeks.sort((a, b) => a.getTime() - b.getTime()).map((week) =>
+        actualWeeks.sort((a, b) => a.getTime() - b.getTime()).map((week) =>
           Markup.button.callback(
             weekToHuman(week),
             callbackIdBuild('group_week', [ groupId, dateToCallback(week) ])
           )
         ),
-        3
+        3,
+        weeks.length !== actualWeeks.length
+          ? [ [ Markup.button.callback('🚽 Архив недель', callbackIdBuild(
+            'week', [ 'archive', WeeksArchiveType.Group, groupId ])) ] ]
+          : []
       )
 
       await ctx.editMessageText('🛗 Выбери неделю')
@@ -372,7 +522,7 @@ bot.on(message('text'), async (ctx) => {
     ctx.user.state = UserState.MainMenu
     await ctx.user.save()
 
-    ctx.reply('🤨', {
+    await ctx.reply('🤨', {
       reply_markup: keyboards[ctx.user.state].resize().reply_markup
     })
 

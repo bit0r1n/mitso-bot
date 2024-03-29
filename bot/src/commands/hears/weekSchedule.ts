@@ -1,7 +1,7 @@
 import { Markup } from 'telegraf'
 import { UserState } from '../../schemas/User'
 import { AbstractHearsCommand, CommandContext, CommandUtils } from '../../utils/commandHelpers'
-import { batchButtons, callbackIdBuild, dateToCallback } from '../../utils/keyboards'
+import { batchButtons, callbackIdBuild, dateToCallback, WeeksArchiveType } from '../../utils/keyboards'
 import { getWeekStart, weekToHuman } from '../../keeper/helpers'
 
 export class WeekScheduleCommand extends AbstractHearsCommand {
@@ -18,11 +18,14 @@ export class WeekScheduleCommand extends AbstractHearsCommand {
     weekStartDate.setTime(weekStartDate.getTime() + (3 * 60 ** 2 * 1e3))
 
     const weekStart = getWeekStart(weekStartDate)
+    const groupId = ctx.user.group!.id!
 
     const weeks = await keeper.getWeeks({
-      group: ctx.user.group!.id!,
-      from: weekStart
+      group: groupId,
+      // from: weekStart
     })
+
+    const actualWeeks = weeks.filter(w => w.getTime() >= weekStart.getTime())
 
     if (!weeks.length) {
       await ctx.reply('🌴 Недель с занятиями не нашлось')
@@ -30,13 +33,16 @@ export class WeekScheduleCommand extends AbstractHearsCommand {
     }
 
     const buttons = batchButtons(
-      weeks.sort((a, b) => a.getTime() - b.getTime()).map((week, i) =>
+      actualWeeks.sort((a, b) => a.getTime() - b.getTime()).map((week, i) =>
         Markup.button.callback(
           weekToHuman(week),
           callbackIdBuild('week', [ `${i}`, dateToCallback(week) ])
         )),
       3,
-      // [ [ Markup.button.callback('🚽 Архив недель', callbackIdBuild('week', [ 'archive' ])) ] ]
+      weeks.length !== actualWeeks.length
+        ? [ [ Markup.button.callback('🚽 Архив недель', callbackIdBuild(
+          'week', [ 'archive', WeeksArchiveType.Group, groupId ])) ] ]
+        : []
     )
 
     await ctx.reply('🧦 Выбери неделю', {

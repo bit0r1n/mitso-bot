@@ -2,6 +2,16 @@ import { InlineKeyboardButton } from 'telegraf/types'
 import { UserState } from '../schemas/User'
 import { Markup } from 'telegraf'
 
+export enum WeeksArchiveAction {
+  GetLessons = 'gl',
+  ShowPage = 'sp'
+}
+
+export enum WeeksArchiveType {
+  Group = 'gp',
+  Teacher = 'tc'
+}
+
 export const CallbackIdSplitter = ':'
 
 export const keyboards = {
@@ -29,6 +39,8 @@ export const batchButtons = (buttons: InlineKeyboardButton[], rowSize = 3, extra
 export const callbackIdBuild = (command: string, args?: string[]): string => {
   return [ command, ...(args || []) ].join(CallbackIdSplitter)
 }
+
+export const callbackIdParse = (str: string) => str.split(CallbackIdSplitter)
 
 export const dateToCallback = (date: Date): string =>
   `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate()}`

@@ -18,8 +18,12 @@ export class Keeper extends BaseApi {
         .forEach(teacher => query.append('teachers', teacher))
     }
 
-    if (options.from) {
+    if (options?.from) {
       query.set('from', options.from.toISOString())
+    }
+
+    if (options?.before) {
+      query.set('before', options.before.toISOString())
     }
 
     return (await this.request<string[]>('weeks', query))

@@ -56,6 +56,7 @@ app.get('/weeks', async (req, res) => {
   const group = req.query.group as string | undefined
   const teachers = req.query.teachers as string | string[] | undefined
   const from = req.query.from as string | undefined
+  const before = req.query.before as string | undefined
   if (!(group || teachers?.length)) {
     res.status(400).json({ error: '"group" or "teachers" is required' })
     return
@@ -63,6 +64,11 @@ app.get('/weeks', async (req, res) => {
 
   if (from && isNaN(new Date(from).valueOf())) {
     res.status(400).json({ error: '"from" is invalid' })
+    return
+  }
+
+  if (before && isNaN(new Date(before).valueOf())) {
+    res.status(400).json({ error: '"before" is invalid' })
     return
   }
 
@@ -84,6 +90,10 @@ app.get('/weeks', async (req, res) => {
 
   if (from) {
     filter.from = new Date(from)
+  }
+
+  if (before) {
+    filter.before = new Date(before)
   }
 
   if (group) {

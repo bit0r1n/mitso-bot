@@ -21,6 +21,7 @@ export interface GetWeeksOptions {
   group?: string
   teachers?: string[]
   from?: Date
+  before?: Date
 }
 
 export interface ILesson {
@@ -49,7 +50,7 @@ const lessonSchema = new mongoose.Schema<ILesson, LessonModel>({
 }, {
   statics: {
     async getWeeks(filter: GetWeeksOptions): Promise<Date[]> {
-      const { group, teachers, from } = filter
+      const { group, teachers, from, before } = filter
       const filterOptions: mongoose.FilterQuery<ILesson> = {}
 
       if (group) {
@@ -65,6 +66,13 @@ const lessonSchema = new mongoose.Schema<ILesson, LessonModel>({
       if (from) {
         filterOptions['date'] = {
           $gte: getWeekStart(from),
+        }
+      }
+
+      if (before) {
+        filterOptions['date'] = {
+          ...filterOptions['date'],
+          $lte: before
         }
       }
 

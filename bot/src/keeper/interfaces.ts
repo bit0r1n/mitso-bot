@@ -2,6 +2,7 @@ export interface WeeksSearchOptions {
   group?: string
   teachers?: string | string[]
   from?: Date
+  before?: Date
 }
 
 export interface LessonsSearchOptions {
