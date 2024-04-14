@@ -5,7 +5,14 @@ export enum UserState {
   AskingGroup,
   AskingWeekTeacher,
   AskingWeekGroup,
-  ChoosingGroup
+  ChoosingGroup,
+  ChoosingRole,
+  AskingTeacherProfile
+}
+
+export enum UserRole {
+  Student,
+  Teacher
 }
 
 interface IGroup {
@@ -17,6 +24,7 @@ export interface IUser {
   telegramId: number
   username: string
   state: UserState
+  role?: UserRole
   choosing_groups?: IGroup[]
   group?: IGroup
   blacklisted?: boolean
@@ -25,10 +33,11 @@ export interface IUser {
 const userSchema = new mongoose.Schema<IUser>({
   telegramId: { type: Number, required: true },
   username: String,
-  state: { type: Number, required: true },
+  state: { type: Number, required: true, default: UserState.ChoosingRole },
   choosing_groups: [ { id: String, display: String } ],
   group: { id: String, display: String },
-  blacklisted: Boolean
+  blacklisted: Boolean,
+  role: Number
 })
 
 export const User = mongoose.model('User', userSchema)

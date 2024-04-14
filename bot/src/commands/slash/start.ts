@@ -9,14 +9,16 @@ export class StartCommand extends AbstractSlashCommand {
   }
 
   async execute(ctx: SlashCommandContext) {
+    const { state } = ctx.user
+
     if (ctx.newUser) {
-      await ctx.reply('🍉 Привет, я могу тебе показывать расписание!\nТолько мне для этого нужно знать твою группу 😫')
-      await ctx.reply('🤨 Давай найдем твою группу. Напиши её номер')
+      await ctx.reply('🍉 Привет, я могу тебе показывать расписание!\nТолько мне для этого нужно знать кто ты вообще по масти 😫')
+      await ctx.reply('🤨 Давай определимся кто ты', {
+        reply_markup: keyboards[state].resize().reply_markup
+      })
       return
     }
-  
-    const state = ctx.user.state
-  
+
     switch (state) {
     case UserState.MainMenu: {
       await ctx.reply('🍉 Хватай меню', {
@@ -50,6 +52,12 @@ export class StartCommand extends AbstractSlashCommand {
     }
     case UserState.AskingWeekTeacher: {
       await ctx.reply('📛 Напиши инициалы преподавателя, расписание которого ты хочешь узнать', {
+        reply_markup: keyboards[state].resize().reply_markup
+      })
+      return
+    }
+    case UserState.ChoosingRole: {
+      await ctx.reply('🪤 Погоди, давай определимся кто ты', {
         reply_markup: keyboards[state].resize().reply_markup
       })
       return

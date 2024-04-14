@@ -48,8 +48,7 @@ bot.use(async (ctx, next) => {
   if (!user) {
     user = await User.create({
       telegramId: chatId,
-      username: ctx.from.username,
-      state: UserState.AskingGroup
+      username: ctx.from.username
     })
     ctx.newUser = true
   }

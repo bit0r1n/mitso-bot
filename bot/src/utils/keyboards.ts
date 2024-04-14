@@ -22,6 +22,9 @@ export const keyboards = {
   [UserState.MainMenu]: Markup.keyboard([
     [ Markup.button.text('Сегодня'), Markup.button.text('Завтра'), Markup.button.text('Неделя') ],
     [ Markup.button.text('Другие расписания'), Markup.button.text('Сменить группу') ]
+  ]),
+  [UserState.ChoosingRole]: Markup.keyboard([
+    [ Markup.button.text('Студент'), Markup.button.text('Преподаватель') ]
   ])
 }
 
