@@ -480,8 +480,8 @@ bot.on(callbackQuery('data'), async (ctx) => {
         `Распиание на ${target} для ${group.display}`,
         lessonsToMessage(lessons),
         null,
-        '❤️‍🔥 [ПОДДЕРЖАТЬ МАТЕРИАЛЬНО!!](https://bitor.in/donate)'
-      ].join('\n'), { parse_mode: 'MarkdownV2' })
+        '❤️‍🔥 <a href="https://bitor.in/donate">ПОДДЕРЖАТЬ МАТЕРИАЛЬНО!!</a>'
+      ].join('\n'), { parse_mode: 'HTML' })
     }
   }
 })
