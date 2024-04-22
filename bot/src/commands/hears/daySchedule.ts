@@ -34,7 +34,9 @@ export class DayScheduleCommand extends AbstractHearsCommand {
     }
     await ctx.reply([
       `Расписание ${ctx.user.group!.display} на ${ctx.message.text.toLowerCase()}`,
-      lessonsToMessage(lessons)
-    ].join('\n'))
+      lessonsToMessage(lessons),
+      null,
+      '❤️‍🔥 [ПОДДЕРЖАТЬ МАТЕРИАЛЬНО!!](https://bitor.in/donate)'
+    ].join('\n'), { parse_mode: 'MarkdownV2' })
   }
 }

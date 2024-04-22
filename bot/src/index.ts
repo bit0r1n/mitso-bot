@@ -367,8 +367,10 @@ bot.on(callbackQuery('data'), async (ctx) => {
 
       await ctx.editMessageText([
         `Распиание на ${target} у ${teacherName}`,
-        lessonsToMessage(lessons, groups)
-      ].join('\n'))
+        lessonsToMessage(lessons, groups),
+        null,
+        '❤️‍🔥 [ПОДДЕРЖАТЬ МАТЕРИАЛЬНО!!](https://bitor.in/donate)'
+      ].join('\n'), { parse_mode: 'MarkdownV2' })
     }
   } else if (command === 'group_week') {
     const [ groupId, weekStartRaw ] = args
@@ -476,8 +478,10 @@ bot.on(callbackQuery('data'), async (ctx) => {
 
       await ctx.editMessageText([
         `Распиание на ${target} для ${group.display}`,
-        lessonsToMessage(lessons)
-      ].join('\n'))
+        lessonsToMessage(lessons),
+        null,
+        '❤️‍🔥 [ПОДДЕРЖАТЬ МАТЕРИАЛЬНО!!](https://bitor.in/donate)'
+      ].join('\n'), { parse_mode: 'MarkdownV2' })
     }
   }
 })
