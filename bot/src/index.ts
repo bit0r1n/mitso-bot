@@ -182,8 +182,10 @@ bot.on(callbackQuery('data'), async (ctx) => {
 
         await ctx.editMessageText([
           `Расписание ${groupName} на неделю с ${target}`,
-          lessonsToMessage(lessons, groups)
-        ].join('\n'))
+          lessonsToMessage(lessons, groups),
+          null,
+          '❤️‍🔥 <a href="https://bitor.in/donate">ПОДДЕРЖАТЬ МАТЕРИАЛЬНО!!</a>'
+        ].join('\n'), { parse_mode: 'HTML', disable_web_page_preview: true })
 
         break
       }
@@ -283,8 +285,10 @@ bot.on(callbackQuery('data'), async (ctx) => {
     await ctx.answerCbQuery()
     await ctx.editMessageText([
       `Расписание ${groupName} на ${target}`,
-      lessonsToMessage(lessons)
-    ].join('\n'))
+      lessonsToMessage(lessons),
+      null,
+      '❤️‍🔥 <a href="https://bitor.in/donate">ПОДДЕРЖАТЬ МАТЕРИАЛЬНО!!</a>'
+    ].join('\n'), { parse_mode: 'HTML', disable_web_page_preview: true })
   } else if (command === 'teacher_week') {
     const [ teacherName, weekStartRaw ] = args
 
@@ -369,8 +373,8 @@ bot.on(callbackQuery('data'), async (ctx) => {
         `Распиание на ${target} у ${teacherName}`,
         lessonsToMessage(lessons, groups),
         null,
-        '❤️‍🔥 [ПОДДЕРЖАТЬ МАТЕРИАЛЬНО!!](https://bitor.in/donate)'
-      ].join('\n'), { parse_mode: 'MarkdownV2' })
+        '❤️‍🔥 <a href="https://bitor.in/donate">ПОДДЕРЖАТЬ МАТЕРИАЛЬНО!!</a>'
+      ].join('\n'), { parse_mode: 'HTML', disable_web_page_preview: true })
     }
   } else if (command === 'group_week') {
     const [ groupId, weekStartRaw ] = args
@@ -481,7 +485,7 @@ bot.on(callbackQuery('data'), async (ctx) => {
         lessonsToMessage(lessons),
         null,
         '❤️‍🔥 <a href="https://bitor.in/donate">ПОДДЕРЖАТЬ МАТЕРИАЛЬНО!!</a>'
-      ].join('\n'), { parse_mode: 'HTML' })
+      ].join('\n'), { parse_mode: 'HTML', disable_web_page_preview: true })
     }
   }
 })

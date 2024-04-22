@@ -37,6 +37,6 @@ export class DayScheduleCommand extends AbstractHearsCommand {
       lessonsToMessage(lessons),
       null,
       '❤️‍🔥 <a href="https://bitor.in/donate">ПОДДЕРЖАТЬ МАТЕРИАЛЬНО!!</a>'
-    ].join('\n'), { parse_mode: 'HTML' })
+    ].join('\n'), { parse_mode: 'HTML', disable_web_page_preview: true })
   }
 }
