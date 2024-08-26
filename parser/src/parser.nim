@@ -111,6 +111,12 @@ router parserRouter:
       $(%*{ "error": "Failed to parse week" }),
       "application/json; charset=utf-8"
     )
+  error ScheduleServiceError:
+    resp(
+      Http500,
+      $(%*{ "error": "Schedule service returned an unexpected result" }),
+      "application/json; charset=utf-8"
+    )
   error Http404:
     resp(
       Http404,
@@ -121,7 +127,7 @@ router parserRouter:
 proc main() {.async.} =
   mitsoParser = newScheduleSite()
   echo "Loading groups..."
-  fetchedGroups =   await mitsoParser.loadGroups()
+  fetchedGroups = await mitsoParser.loadGroups()
 
   let s = newSettings(
     Port(3000)
