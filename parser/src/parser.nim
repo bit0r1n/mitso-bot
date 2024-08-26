@@ -3,7 +3,9 @@ import mitso/[schedule, helpers, typedefs]
 import jester
 import helpers, errors
 
-var mitsoParser {.threadvar.}: ScheduleSite
+var
+  mitsoParser {.threadvar.}: ScheduleSite
+  fetchedGroups {.threadvar.}: seq[Group]
 
 router parserRouter:
   get "/":
@@ -13,8 +15,8 @@ router parserRouter:
       "application/json; charset=utf-8"
     )
   get "/groups":
-    let groups: seq[Group] = filterGroups(
-      mitsoParser.groups,
+    var groups: seq[Group] = filterGroups(
+      fetchedGroups,
       toTable(toSeq(decodeQuery(request.query)))
     )
     resp(
@@ -23,34 +25,37 @@ router parserRouter:
       "application/json; charset=utf-8"
     )
   get "/groups/@id":
-    let
+    var
       id = decodeUrl(@"id")
       filteredGroups = filterGroups(
-        mitsoParser.groups,
+        fetchedGroups,
         toTable(toSeq(decodeQuery(request.query)))
       ).filterIt(it.id == id)
 
     if filteredGroups.len == 0:
       raise newException(GroupNotFound, "Group not found")
+
+    let group = filteredGroups[0]
+    filteredGroups.setLen(0)
     resp(
       Http200,
-      $(%*{ "result": %filteredGroups[0] }),
+      $(%*{ "result": %group }),
       "application/json; charset=utf-8"
     )
   get "/groups/@id/weeks":
-    let
+    var
       id = decodeUrl(@"id")
       filteredGroups = filterGroups(
-        mitsoParser.groups,
+        fetchedGroups,
         toTable(toSeq(decodeQuery(request.query)))
       ).filterIt(it.id == id)
 
     if filteredGroups.len == 0:
       raise newException(GroupNotFound, "Group not found")
 
-    let
-      group = filteredGroups[0]
-      weeks = await group.getWeeks()
+    var group = filteredGroups[0]
+    filteredGroups.setLen(0)
+    let weeks = await mitsoParser.getWeeks(group)
 
     resp(
       Http200,
@@ -58,25 +63,28 @@ router parserRouter:
       "application/json; charset=utf-8"
     )
   get "/groups/@id/weeks/@week":
-    let
+    var
       id = decodeUrl(@"id")
       filteredGroups = filterGroups(
-        mitsoParser.groups,
+        fetchedGroups,
         toTable(toSeq(decodeQuery(request.query)))
       ).filterIt(it.id == id)
 
     if filteredGroups.len == 0:
       raise newException(GroupNotFound, "Group not found")
 
-    let
-      group = filteredGroups[0]
-      weeks = await group.getWeeks()
+    var group = filteredGroups[0]
+    filteredGroups.setLen(0)
+    var weeks = await mitsoParser.getWeeks(group)
 
     if weeks.filterIt(it.id == @"week").len == 0:
+      weeks.setLen(0)
       raise newException(WeekNotFound, "Week not found")
 
+    weeks.setLen(0)
+
     try:
-      let schedule = await group.getSchedule(@"week")
+      let schedule = await mitsoParser.getSchedule(group, @"week")
 
       resp(
         Http200,
@@ -113,7 +121,7 @@ router parserRouter:
 proc main() {.async.} =
   mitsoParser = newScheduleSite()
   echo "Loading groups..."
-  discard await mitsoParser.loadGroups()
+  fetchedGroups =   await mitsoParser.loadGroups()
 
   let s = newSettings(
     Port(3000)
