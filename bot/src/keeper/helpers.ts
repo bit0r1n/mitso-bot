@@ -126,16 +126,17 @@ export const lessonsToMessage = (lessons: Lesson[], groups?: Group[]): string[] 
     return lines.join('\n')
   })
 
-  let messages: string[] = []
+  const messages: string[] = []
 
   for (const dayString of days) {
-    let lastMessage = messages.at(-1) || ''
+    const lastMessage = messages.at(-1) || ''
 
     const newMessageContent = lastMessage + '\n\n' + dayString
     if (newMessageContent.length > 3840) {
       messages.push(dayString)
     } else {
-      messages[messages.length - 1] = newMessageContent.trim()
+      const messageIndex = messages.length ? messages.length - 1 : 0
+      messages[messageIndex] = newMessageContent.trim()
     }
   }
 
