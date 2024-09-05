@@ -37,8 +37,8 @@ export class DayScheduleCommand extends AbstractHearsCommand {
     for (let i = 0; i < messagesContent.length; i++) {
       let content = ''
       if (i === 0) content = `Расписание ${ctx.user.group!.display} на ${ctx.message.text.toLowerCase()}\n`
-      content += (messagesContent + '\n\n'
-          + '❤️‍🔥 <a href="https://bitor.in/donate">ПОДДЕРЖАТЬ МАТЕРИАЛЬНО!!</a>')
+      content += messagesContent + '\n\n'
+          + '❤️‍🔥 <a href="https://bitor.in/donate">ПОДДЕРЖАТЬ МАТЕРИАЛЬНО!!</a>'
 
       await ctx.reply(content, { parse_mode: 'HTML', disable_web_page_preview: true })
     }

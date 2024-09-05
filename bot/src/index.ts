@@ -180,12 +180,22 @@ bot.on(callbackQuery('data'), async (ctx) => {
           ? (await parser.getGroups())
           : undefined
 
-        await ctx.editMessageText([
-          `Расписание ${groupName} на неделю с ${target}`,
-          lessonsToMessage(lessons, groups),
-          null,
-          '❤️‍🔥 <a href="https://bitor.in/donate">ПОДДЕРЖАТЬ МАТЕРИАЛЬНО!!</a>'
-        ].join('\n'), { parse_mode: 'HTML', disable_web_page_preview: true })
+        const messagesContent = lessonsToMessage(lessons, groups)
+
+        for (let i = 0; i < messagesContent.length; i++) {
+          let content = i === 0
+            ? `Расписание ${groupName} на неделю с ${target}\n`
+            : ''
+
+          content += messagesContent + '\n\n'
+              + '❤️‍🔥 <a href="https://bitor.in/donate">ПОДДЕРЖАТЬ МАТЕРИАЛЬНО!!</a>'
+
+          if (i === 0) {
+            await ctx.editMessageText(content, { parse_mode: 'HTML', disable_web_page_preview: true })
+          } else {
+            await ctx.reply(content, { parse_mode: 'HTML', disable_web_page_preview: true })
+          }
+        }
 
         break
       }
@@ -278,17 +288,28 @@ bot.on(callbackQuery('data'), async (ctx) => {
 
     if (!lessons.length) {
       await ctx.answerCbQuery()
-      await ctx.editMessageText(`🤯 Распиания на ${target} нету`)
+      await ctx.editMessageText(`🤯 Расписания на ${target} нету`)
       return
     }
 
     await ctx.answerCbQuery()
-    await ctx.editMessageText([
-      `Расписание ${groupName} на ${target}`,
-      lessonsToMessage(lessons),
-      null,
-      '❤️‍🔥 <a href="https://bitor.in/donate">ПОДДЕРЖАТЬ МАТЕРИАЛЬНО!!</a>'
-    ].join('\n'), { parse_mode: 'HTML', disable_web_page_preview: true })
+
+    const messagesContent = lessonsToMessage(lessons)
+
+    for (let i = 0; i < messagesContent.length; i++) {
+      let content = i === 0
+        ? `Расписание ${groupName} на ${target}\n`
+        : ''
+
+      content += messagesContent + '\n\n'
+          + '❤️‍🔥 <a href="https://bitor.in/donate">ПОДДЕРЖАТЬ МАТЕРИАЛЬНО!!</a>'
+
+      if (i === 0) {
+        await ctx.editMessageText(content, { parse_mode: 'HTML', disable_web_page_preview: true })
+      } else {
+        await ctx.reply(content, { parse_mode: 'HTML', disable_web_page_preview: true })
+      }
+    }
   } else if (command === 'teacher_week') {
     const [ teacherName, weekStartRaw ] = args
 
@@ -369,12 +390,22 @@ bot.on(callbackQuery('data'), async (ctx) => {
 
       const target = weekDiff === 0 ? 'текущую неделю' : `${weekDiff + 1} неделю`
 
-      await ctx.editMessageText([
-        `Распиание на ${target} у ${teacherName}`,
-        lessonsToMessage(lessons, groups),
-        null,
-        '❤️‍🔥 <a href="https://bitor.in/donate">ПОДДЕРЖАТЬ МАТЕРИАЛЬНО!!</a>'
-      ].join('\n'), { parse_mode: 'HTML', disable_web_page_preview: true })
+      const messagesContent = lessonsToMessage(lessons, groups)
+
+      for (let i = 0; i < messagesContent.length; i++) {
+        let content = i === 0
+          ? `Расписание на ${target} у ${teacherName}\n`
+          : ''
+
+        content += messagesContent + '\n\n'
+            + '❤️‍🔥 <a href="https://bitor.in/donate">ПОДДЕРЖАТЬ МАТЕРИАЛЬНО!!</a>'
+
+        if (i === 0) {
+          await ctx.editMessageText(content, { parse_mode: 'HTML', disable_web_page_preview: true })
+        } else {
+          await ctx.reply(content, { parse_mode: 'HTML', disable_web_page_preview: true })
+        }
+      }
     }
   } else if (command === 'group_week') {
     const [ groupId, weekStartRaw ] = args
@@ -480,12 +511,22 @@ bot.on(callbackQuery('data'), async (ctx) => {
 
       const target = weekDiff === 0 ? 'текущую неделю' : `${weekDiff + 1} неделю`
 
-      await ctx.editMessageText([
-        `Распиание на ${target} для ${group.display}`,
-        lessonsToMessage(lessons),
-        null,
-        '❤️‍🔥 <a href="https://bitor.in/donate">ПОДДЕРЖАТЬ МАТЕРИАЛЬНО!!</a>'
-      ].join('\n'), { parse_mode: 'HTML', disable_web_page_preview: true })
+      const messagesContent = lessonsToMessage(lessons)
+
+      for (let i = 0; i < messagesContent.length; i++) {
+        let content = i === 0
+          ? `Расписание на ${target} для ${group.display}\n`
+          : ''
+
+        content += messagesContent + '\n\n'
+            + '❤️‍🔥 <a href="https://bitor.in/donate">ПОДДЕРЖАТЬ МАТЕРИАЛЬНО!!</a>'
+
+        if (i === 0) {
+          await ctx.editMessageText(content, { parse_mode: 'HTML', disable_web_page_preview: true })
+        } else {
+          await ctx.reply(content, { parse_mode: 'HTML', disable_web_page_preview: true })
+        }
+      }
     }
   }
 })
