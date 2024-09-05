@@ -83,7 +83,7 @@ export const lessonToMessage = (lesson: Lesson | LessonGroups, groups?: Group[])
   return items.join(' | ')
 }
 
-export const lessonsToMessage = (lessons: Lesson[], groups?: Group[]): string => {
+export const lessonsToMessage = (lessons: Lesson[], groups?: Group[]): string[] => {
   const daysLessons = lessons
     .sort((a, b) => a.date.getTime() - b.date.getTime())
     .reduce((acc, lesson) => {
@@ -126,7 +126,20 @@ export const lessonsToMessage = (lessons: Lesson[], groups?: Group[]): string =>
     return lines.join('\n')
   })
 
-  return days.join('\n\n')
+  let messages: string[] = []
+
+  for (const dayString of days) {
+    let lastMessage = messages.at(-1) || ''
+
+    const newMessageContent = lastMessage + '\n\n' + dayString
+    if (newMessageContent.length > 3840) {
+      messages.push(dayString)
+    } else {
+      messages[messages.length - 1] = newMessageContent.trim()
+    }
+  }
+
+  return messages
 }
 
 export const weekToHuman = (weekStart: Date, from = getWeekStart(), incrementDay = false): string => {

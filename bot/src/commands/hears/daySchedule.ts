@@ -32,11 +32,15 @@ export class DayScheduleCommand extends AbstractHearsCommand {
       await ctx.reply(`🤩 На ${ctx.message.text.toLowerCase()} нет занятий`)
       return
     }
-    await ctx.reply([
-      `Расписание ${ctx.user.group!.display} на ${ctx.message.text.toLowerCase()}`,
-      lessonsToMessage(lessons),
-      null,
-      '❤️‍🔥 <a href="https://bitor.in/donate">ПОДДЕРЖАТЬ МАТЕРИАЛЬНО!!</a>'
-    ].join('\n'), { parse_mode: 'HTML', disable_web_page_preview: true })
+
+    const messagesContent = lessonsToMessage(lessons)
+    for (let i = 0; i < messagesContent.length; i++) {
+      let content = ''
+      if (i === 0) content = `Расписание ${ctx.user.group!.display} на ${ctx.message.text.toLowerCase()}\n`
+      content += (messagesContent + '\n\n'
+          + '❤️‍🔥 <a href="https://bitor.in/donate">ПОДДЕРЖАТЬ МАТЕРИАЛЬНО!!</a>')
+
+      await ctx.reply(content, { parse_mode: 'HTML', disable_web_page_preview: true })
+    }
   }
 }
