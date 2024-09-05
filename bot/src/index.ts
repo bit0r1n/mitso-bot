@@ -187,7 +187,7 @@ bot.on(callbackQuery('data'), async (ctx) => {
             ? `Расписание ${groupName} на неделю с ${target}\n`
             : ''
 
-          content += messagesContent + '\n\n'
+          content += messagesContent[i] + '\n\n'
               + '❤️‍🔥 <a href="https://bitor.in/donate">ПОДДЕРЖАТЬ МАТЕРИАЛЬНО!!</a>'
 
           if (i === 0) {
@@ -301,7 +301,7 @@ bot.on(callbackQuery('data'), async (ctx) => {
         ? `Расписание ${groupName} на ${target}\n`
         : ''
 
-      content += messagesContent + '\n\n'
+      content += messagesContent[i] + '\n\n'
           + '❤️‍🔥 <a href="https://bitor.in/donate">ПОДДЕРЖАТЬ МАТЕРИАЛЬНО!!</a>'
 
       if (i === 0) {
@@ -397,7 +397,7 @@ bot.on(callbackQuery('data'), async (ctx) => {
           ? `Расписание на ${target} у ${teacherName}\n`
           : ''
 
-        content += messagesContent + '\n\n'
+        content += messagesContent[i] + '\n\n'
             + '❤️‍🔥 <a href="https://bitor.in/donate">ПОДДЕРЖАТЬ МАТЕРИАЛЬНО!!</a>'
 
         if (i === 0) {
@@ -518,7 +518,7 @@ bot.on(callbackQuery('data'), async (ctx) => {
           ? `Расписание на ${target} для ${group.display}\n`
           : ''
 
-        content += messagesContent + '\n\n'
+        content += messagesContent[i] + '\n\n'
             + '❤️‍🔥 <a href="https://bitor.in/donate">ПОДДЕРЖАТЬ МАТЕРИАЛЬНО!!</a>'
 
         if (i === 0) {
