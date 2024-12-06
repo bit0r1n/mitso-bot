@@ -68,21 +68,29 @@ export function parseLessonType(raw: string): LessonType {
 export function parseLessonTime(raw: string): LessonTime {
   switch (raw) {
   case '08:00 - 9:20':
+  case '08:00 - 9:25':
     return LessonTime.First
   case '09:35 - 10:55':
+  case '09:35 - 11:00':
     return LessonTime.Second
   case '11:05 - 12:25':
+  case '11:10 - 12:35':
     return LessonTime.Third
   case '13:00 - 14:20':
+  case '13:05 - 14:30':
     return LessonTime.Fourth
   case '14:35 - 15:55':
+  case '14:40 - 16:05':
     return LessonTime.Fifth
   case '16:25 - 17:45':
+  case '16:35 - 18:00':
     return LessonTime.Sixth
   case '17:55 - 19:15':
+  case '18:10 - 19:35':
     return LessonTime.Seventh
   case '19.25 - 20.45':
   case '19:25 - 20:45':
+  case '19:45 - 21:10':
     return LessonTime.Eighth
   default:
     throw new Error('Unknown lesson time: ' + raw)
