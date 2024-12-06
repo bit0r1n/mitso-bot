@@ -31,21 +31,21 @@ export function getWeekStart(date: Date = new Date()) {
 export const lessonTimeToHuman = (time: LessonTime): string => {
   switch (time) {
   case LessonTime.First:
-    return '08:00 - 9:20'
+    return '08:00 - 9:25'
   case LessonTime.Second:
-    return '09:35 - 10:55'
+    return '09:35 - 11:00'
   case LessonTime.Third:
-    return '11:05 - 12:25'
+    return '11:10 - 12:35'
   case LessonTime.Fourth:
-    return '13:00 - 14:20'
+    return '13:05 - 14:30'
   case LessonTime.Fifth:
-    return '14:35 - 15:55'
+    return '14:40 - 16:05'
   case LessonTime.Sixth:
-    return '16:25 - 17:45'
+    return '16:35 - 18:00'
   case LessonTime.Seventh:
-    return '17:55 - 19:15'
+    return '18:10 - 19:35'
   case LessonTime.Eighth:
-    return '19:25 - 20:45'
+    return '19:45 - 21:10'
   }
 }
 
