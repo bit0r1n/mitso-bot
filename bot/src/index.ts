@@ -608,6 +608,12 @@ bot.on(message('text'), async (ctx) => {
   }
 })
 
+process.on('uncaughtException', console.error)
+
+process.on('unhandledRejection', console.error)
+
+bot.catch((err) => console.error(err))
+
 if (process.env.WEBHOOK_DOMAIN?.length) {
   const secretToken = process.env.WEBHOOK_SECRET?.length ? process.env.WEBHOOK_SECRET : createSecret()
   const webhookDomain = process.env.WEBHOOK_DOMAIN!
