@@ -171,6 +171,10 @@ app.get('/teachers', async (req, res) => {
 
 })
 
+process.on('uncaughtException', console.error)
+
+process.on('unhandledRejection', console.error)
+
 app.listen(3000, () => {
   console.log('Server started on port 3000')
 })
