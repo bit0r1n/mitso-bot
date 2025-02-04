@@ -1,5 +1,5 @@
 import { CancelCommand } from './cancel'
-import { ChangeGroupCommand } from './changeGroup'
+import { SettingsCommand } from './settings'
 import { DayScheduleCommand } from './daySchedule'
 import { OtherSchedulesCommand } from './otherSchedules'
 import { WeekScheduleCommand } from './weekSchedule'
@@ -9,7 +9,7 @@ export default {
   WeekScheduleCommand,
   OtherSchedulesCommand,
 
-  ChangeGroupCommand,
+  SettingsCommand,
 
   CancelCommand
 }
@@ -19,7 +19,7 @@ export const hearsCommands = [
   WeekScheduleCommand,
   OtherSchedulesCommand,
 
-  ChangeGroupCommand,
+  SettingsCommand,
 
   CancelCommand
 ]

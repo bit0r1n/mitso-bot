@@ -1,5 +1,5 @@
 import { lessonsToMessage } from '../../keeper/helpers'
-import { UserState } from '../../schemas/User'
+import { UserRole, UserState } from '../../schemas/User'
 import { AbstractHearsCommand, CommandContext, CommandUtils } from '../../utils/commandHelpers'
 
 export class DayScheduleCommand extends AbstractHearsCommand {
@@ -21,22 +21,30 @@ export class DayScheduleCommand extends AbstractHearsCommand {
     const tomorrowStart = new Date()
     tomorrowStart.setTime(todayStart.getTime() + (24 * 60 ** 2 * 1e3))
     tomorrowStart.setHours(0, 0, 0, 0)
-  
+
+    const isStudent = ctx.user.role !== UserRole.Teacher
+
     const lessons = await keeper.getLessons({
-      group: ctx.user.group!.id,
+      group: isStudent ? ctx.user.group!.id : undefined,
+      teachers: isStudent ? undefined : ctx.user.teacher_name,
       from: todayStart,
       before: tomorrowStart
     })
-  
+
     if (!lessons.length) {
       await ctx.reply(`🤩 На ${ctx.message.text.toLowerCase()} нет занятий`)
       return
     }
 
-    const messagesContent = lessonsToMessage(lessons)
+    const groupsList = ctx.user.role === UserRole.Teacher
+      ? (await this.utils.parser.getGroups())
+      : undefined
+
+    const messagesContent = lessonsToMessage(lessons, groupsList)
+    const displayName = isStudent ? ctx.user.group!.display : ctx.user.teacher_name!
     for (let i = 0; i < messagesContent.length; i++) {
       let content = ''
-      if (i === 0) content = `Расписание ${ctx.user.group!.display} на ${ctx.message.text.toLowerCase()}\n`
+      if (i === 0) content = `Расписание ${displayName} на ${ctx.message.text.toLowerCase()}\n`
       content += messagesContent[i] + '\n\n'
           + '❤️‍🔥 <a href="https://bitor.in/donate">ПОДДЕРЖАТЬ МАТЕРИАЛЬНО!!</a>'
 

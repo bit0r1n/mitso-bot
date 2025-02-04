@@ -2,10 +2,10 @@ import * as mongoose from 'mongoose'
 
 export enum UserState {
   MainMenu,
-  AskingGroup,
+  AskingFollowingEntity,
   AskingWeekTeacher,
   AskingWeekGroup,
-  ChoosingGroup
+  ChoosingFollowingEntity
 }
 
 interface IGroup {

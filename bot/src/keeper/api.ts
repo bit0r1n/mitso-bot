@@ -55,16 +55,16 @@ export class Keeper extends BaseApi {
         .forEach(classroom => query.append('classrooms', classroom))
     }
 
-    return (await this.request<RawLesson[]>('lessons', query))
-      .map((lesson: RawLesson) => ({
-        date: new Date(lesson.date),
-        name: lesson.name,
-        type: lesson.type,
-        time: lesson.time,
-        teachers: lesson.teachers,
-        classrooms: lesson.classrooms,
-        group: lesson.group
-      }))
+    const rawLessons = await this.request<RawLesson[]>('lessons', query)
+    return rawLessons.map((lesson: RawLesson) => ({
+      date: new Date(lesson.date),
+      name: lesson.name,
+      type: lesson.type,
+      time: lesson.time,
+      teachers: lesson.teachers,
+      classrooms: lesson.classrooms,
+      group: lesson.group
+    }))
   }
 
   async getTeachers(options?: TeacherSearchOptions): Promise<string[]> {

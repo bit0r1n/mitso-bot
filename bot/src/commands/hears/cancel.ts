@@ -1,4 +1,4 @@
-import { UserState } from '../../schemas/User'
+import { UserRole, UserState } from '../../schemas/User'
 import { AbstractHearsCommand, CommandContext, CommandUtils } from '../../utils/commandHelpers'
 import { keyboards } from '../../utils/keyboards'
 
@@ -8,9 +8,13 @@ export class CancelCommand extends AbstractHearsCommand {
   }
 
   async execute(ctx: CommandContext) {
-    if (ctx.user.state === UserState.ChoosingGroup) {
-      if (!ctx.user.group || !Object.values(ctx.user.group).filter(Boolean).length) {
+    if (ctx.user.state === UserState.ChoosingFollowingEntity) {
+      const isStudent = ctx.user.role !== UserRole.Teacher
+
+      if (isStudent && (!ctx.user.group || !Object.values(ctx.user.group).filter(Boolean).length)) {
         await ctx.reply('😳 Нее, без группы мы не начинаем')
+      } else if (ctx.user.role === UserRole.Teacher && !ctx.user.teacher_name) {
+        await ctx.reply('🫠 Нее, так не начинаем')
       } else {
         ctx.user.state = UserState.MainMenu
         await ctx.user.save()
