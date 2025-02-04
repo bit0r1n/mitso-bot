@@ -1,7 +1,7 @@
 import { Markup, Telegraf } from 'telegraf'
 import * as mongoose from 'mongoose'
 import { SuperDuperUpgradedContext } from './utils/context'
-import { User, UserState } from './schemas/User'
+import { User, UserRole, UserState } from './schemas/User'
 import {
   batchButtons,
   callbackIdBuild,
@@ -49,7 +49,7 @@ bot.use(async (ctx, next) => {
     user = await User.create({
       telegramId: chatId,
       username: ctx.from.username,
-      state: UserState.AskingGroup
+      state: UserState.AskingFollowingEntity
     })
     ctx.newUser = true
   }
@@ -78,28 +78,53 @@ for (const command of registeredHearsCommands) {
 bot.on(callbackQuery('data'), async (ctx) => {
   const [ command, ...args ] = callbackIdParse(ctx.callbackQuery.data)
 
-  if (command === 'select_group') {
-    const group = ctx.user.choosing_groups!.find(g => g.id === args[0])
-    if (!group) {
+  if (command === 'select_entity') {
+    const isStudent = ctx.user.role !== UserRole.Teacher
+    if (isStudent) {
+      const group = ctx.user.choosing_groups!.find(g => g.id === args[0])
+      if (!group) {
+        ctx.user.choosing_groups = []
+        ctx.user.state = UserState.AskingFollowingEntity
+        await ctx.user.save()
+
+        return await ctx.reply('😵‍💫 Кажется произошла какая-то ошибка при выборе группы. Попробуй поискать новую группу, отправив её номер')
+      }
       ctx.user.choosing_groups = []
-      ctx.user.state = UserState.AskingGroup
+      ctx.user.choosing_teachers = []
+      ctx.user.teacher_name = undefined
+
+      ctx.user.group = { id: group.id, display: group.display }
+      ctx.user.state = UserState.MainMenu
       await ctx.user.save()
 
-      await ctx.reply('😵‍💫 Кажется произошла какая-то ошибка при выборе группы. Попробуй поискать новую группу, отправив её номер')
-      return
+      await ctx.deleteMessage().catch(() => {})
+
+      return await ctx.replyWithMarkdownV2(`🫔 Выбрана группа *${group.display}*`, {
+        reply_markup: keyboards[ctx.user.state].resize().reply_markup
+      })
+    } else {
+      const teacher = ctx.user.choosing_teachers!.find(g => g === args[0])
+      if (!teacher) {
+        ctx.user.choosing_teachers = []
+        ctx.user.state = UserState.AskingFollowingEntity
+        await ctx.user.save()
+
+        return await ctx.reply('😵‍💫 Кажется произошла какая-то ошибка при выборе преподавателя. Попробуй поискать другого')
+      }
+      ctx.user.choosing_teachers = []
+      ctx.user.choosing_groups = []
+      ctx.user.group = undefined
+
+      ctx.user.teacher_name = teacher
+      ctx.user.state = UserState.MainMenu
+      await ctx.user.save()
+
+      await ctx.deleteMessage().catch(() => {})
+
+      return await ctx.replyWithMarkdownV2(`🕺 Выбран преподаватель *${teacher.replace(/\./g, '\\.')}*`, {
+        reply_markup: keyboards[ctx.user.state].resize().reply_markup
+      })
     }
-    ctx.user.choosing_groups = []
-
-    ctx.user.group = { id: group.id, display: group.display }
-    ctx.user.state = UserState.MainMenu
-    await ctx.user.save()
-
-    await ctx.deleteMessage().catch(() => {})
-
-    await ctx.replyWithMarkdownV2(`🫔 Выбрана группа *${group.display}*`, {
-      reply_markup: keyboards[ctx.user.state].resize().reply_markup
-    })
-    return
   } else if (command === 'week') {
     const [ weekId ] = args
 
@@ -154,12 +179,11 @@ bot.on(callbackQuery('data'), async (ctx) => {
             ? entityId
             : (await parser.getGroup(entityId)).display
         } catch (e) {
-          await ctx.editMessageText(
+          return await ctx.editMessageText(
             (e as Error).message === 'Group not found'
               ? '🥲 Группа не найдена'
               : '🤯 Произошла какая-то ошибка'
           )
-          return
         }
 
         const lessons = await keeper.getLessons({
@@ -172,15 +196,14 @@ bot.on(callbackQuery('data'), async (ctx) => {
         const target = weekToHuman(weekStart, new Date())
 
         if (!lessons.length) {
-          await ctx.editMessageText(`🤯 Распиания на неделю с ${target} нету`)
-          return
+          return await ctx.editMessageText(`🤯 Расписания на неделю с ${target} нету`)
         }
 
-        const groups = entityType === WeeksArchiveType.Teacher
+        const groupsList = entityType === WeeksArchiveType.Teacher
           ? (await parser.getGroups())
           : undefined
 
-        const messagesContent = lessonsToMessage(lessons, groups)
+        const messagesContent = lessonsToMessage(lessons, groupsList)
 
         for (let i = 0; i < messagesContent.length; i++) {
           let content = i === 0
@@ -244,37 +267,37 @@ bot.on(callbackQuery('data'), async (ctx) => {
           extraRows
         )
 
-        await ctx.editMessageReplyMarkup(buttons.reply_markup)
-        break
+        return await ctx.editMessageReplyMarkup(buttons.reply_markup)
       }
       }
       return
     }
 
-    const [ , weekStartRaw, groupId ] = args
+    const [ , entityType, entityId, weekStartRaw ] = args
 
     const weekStart = new Date(weekStartRaw)
     const weekEnd = new Date(weekStartRaw)
     weekEnd.setTime(weekStart.getTime() + (7 * 24 * 60 ** 2 * 1e3))
 
-    let groupName: string = ctx.user.group!.display!
+    const isStudent = ctx.user.role !== UserRole.Teacher
+    let entityName: string = isStudent ? ctx.user.group!.display! : ctx.user.teacher_name!
 
-    if (groupId) {
+    if (entityId && entityType === WeeksArchiveType.Group) {
       try {
-        groupName = (await parser.getGroup(groupId)).display
+        entityName = (await parser.getGroup(entityId)).display
       } catch (e) {
         await ctx.answerCbQuery()
-        await ctx.editMessageText(
+        return await ctx.editMessageText(
           (e as Error).message === 'Group not found'
             ? '🥲 Группа не найдена'
             : '🤯 Произошла какая-то ошибка'
         )
-        return
       }
     }
 
     const lessons = await keeper.getLessons({
-      group: groupId || ctx.user.group!.id,
+      group: entityType === WeeksArchiveType.Group ? entityId || ctx.user.group!.id : undefined,
+      teachers: entityType === WeeksArchiveType.Teacher ? entityId : undefined,
       from: weekStart,
       before: weekEnd
     })
@@ -288,17 +311,20 @@ bot.on(callbackQuery('data'), async (ctx) => {
 
     if (!lessons.length) {
       await ctx.answerCbQuery()
-      await ctx.editMessageText(`🤯 Расписания на ${target} нету`)
-      return
+      return await ctx.editMessageText(`🤯 Расписания на ${target} нету`)
     }
 
     await ctx.answerCbQuery()
 
-    const messagesContent = lessonsToMessage(lessons)
+    const groupsList = entityType === WeeksArchiveType.Teacher
+      ? (await parser.getGroups())
+      : undefined
+
+    const messagesContent = lessonsToMessage(lessons, groupsList)
 
     for (let i = 0; i < messagesContent.length; i++) {
       let content = i === 0
-        ? `Расписание ${groupName} на ${target}\n`
+        ? `Расписание ${entityName} на ${target}\n`
         : ''
 
       content += messagesContent[i] + '\n\n'
@@ -341,8 +367,7 @@ bot.on(callbackQuery('data'), async (ctx) => {
       if (!weeks.length) {
         await ctx.answerCbQuery()
         await ctx.editMessageReplyMarkup(Markup.inlineKeyboard([ [] ]).reply_markup)
-        await ctx.reply('🧉 Кажется кто-то конкретно кайфует')
-        return
+        return await ctx.reply('🧉 Кажется кто-то конкретно кайфует')
       }
 
       const buttons = batchButtons(
@@ -375,8 +400,8 @@ bot.on(callbackQuery('data'), async (ctx) => {
       if (!lessons.length) {
         await ctx.answerCbQuery()
         await ctx.editMessageReplyMarkup(Markup.inlineKeyboard([ [] ]).reply_markup)
-        await ctx.editMessageText('🪤 Емае, неловко как-то вышло)') // неделя нашлась, но нет расписния. в принципе невозможно, но все же
-        return
+        return await ctx.editMessageText('🪤 Емае, неловко как-то вышло)') // неделя нашлась, но нет расписния. в принципе невозможно, но все же
+
       }
 
       await ctx.answerCbQuery()
@@ -429,12 +454,11 @@ bot.on(callbackQuery('data'), async (ctx) => {
       } catch (e) {
         await ctx.answerCbQuery()
         await ctx.editMessageReplyMarkup(Markup.inlineKeyboard([ [] ]).reply_markup)
-        await ctx.editMessageText(
+        return await ctx.editMessageText(
           (e as Error).message === 'Group not found'
             ? '😭 Группа не найдена'
             : '📸 Произошла какая-то ошибка'
         )
-        return
       }
 
       const weekStartDate = new Date()
@@ -450,8 +474,7 @@ bot.on(callbackQuery('data'), async (ctx) => {
 
       if (!weeks.length) {
         await ctx.editMessageReplyMarkup(Markup.inlineKeyboard([ [] ]).reply_markup)
-        await ctx.reply(`🫠 Чувачки из ${group.display} на кайфах`)
-        return
+        return await ctx.reply(`🫠 Чувачки из ${group.display} на кайфах`)
       }
 
       const buttons = batchButtons(
@@ -477,12 +500,11 @@ bot.on(callbackQuery('data'), async (ctx) => {
       } catch (e) {
         await ctx.answerCbQuery()
         await ctx.editMessageReplyMarkup(Markup.inlineKeyboard([ [] ]).reply_markup)
-        await ctx.editMessageText(
+        return await ctx.editMessageText(
           (e as Error).message === 'Group not found'
             ? '😭 Группа не найдена'
             : '📸 Произошла какая-то ошибка'
         )
-        return
       }
 
       const weekStart = new Date(weekStartRaw)
@@ -498,8 +520,8 @@ bot.on(callbackQuery('data'), async (ctx) => {
       if (!lessons.length) {
         await ctx.answerCbQuery()
         await ctx.editMessageReplyMarkup(Markup.inlineKeyboard([ [] ]).reply_markup)
-        await ctx.editMessageText(`🥥 Распиания на неделю для ${group.display} нету`)
-        return
+        return await ctx.editMessageText(`🥥 Расписания на неделю для ${group.display} нету`)
+
       }
 
       await ctx.answerCbQuery()
@@ -528,12 +550,69 @@ bot.on(callbackQuery('data'), async (ctx) => {
         }
       }
     }
+  } else if (command === 'settings') {
+    const [ settingName, chosenRole ] = args
+
+    switch (settingName) {
+    case 'role': {
+      if (chosenRole?.length) {
+        const role = chosenRole === 'teacher' ? UserRole.Teacher : UserRole.Student
+        ctx.user.role = role
+        ctx.user.state = UserState.AskingFollowingEntity
+        ctx.user.isNew = false
+        await ctx.user.save()
+
+        const askingText = role === UserRole.Student ?
+          'Теперь напиши свою группу' :
+          'Теперь напиши инициалы преподавателя (или их часть)'
+
+        await ctx.reply('🤨', {
+          reply_markup: Markup.removeKeyboard().reply_markup
+        })
+
+        return await ctx.editMessageText('🦫 ' + askingText, {
+          reply_markup: Markup.inlineKeyboard([]).reply_markup
+        })
+      }
+
+      const roleOptionsKeyboard = Markup.inlineKeyboard([
+        [
+          Markup.button.callback('Студент', callbackIdBuild('settings', [ 'role', 'student' ])),
+          Markup.button.callback('Преподаватель', callbackIdBuild('settings', [ 'role', 'teacher' ])),
+        ]
+      ])
+
+      return await ctx.editMessageText('🤸 Выбери новую роль', {
+        reply_markup: roleOptionsKeyboard.reply_markup
+      })
+    }
+    case 'change_following': {
+      ctx.user.state = UserState.AskingFollowingEntity
+      await ctx.user.save()
+
+      const isStudent = ctx.user.role !== UserRole.Teacher
+      const askingText = isStudent
+        ? 'Напиши номер группы'
+        : 'Напиши инициалы преподавателя или их часть'
+
+      return await ctx.editMessageText('🤺 ' + askingText, {
+        reply_markup: Markup.inlineKeyboard([]).reply_markup
+      })
+    }
+    }
   }
 })
 
 bot.on(message('text'), async (ctx) => {
   if (ctx.newUser) {
-    await ctx.reply('🤯 Что-то я тебя не видал. Ладно, сейчас оформимся. Напиши номер своей группы, чтобы я знал какое расписание получать')
+    await ctx.reply('🤯 Что-то я тебя не видал. Ладно, сейчас оформимся. Выбери кто ты', {
+      reply_markup: Markup.inlineKeyboard([
+        [
+          Markup.button.callback('Студент', callbackIdBuild('settings', [ 'role', 'student' ])),
+          Markup.button.callback('Преподаватель', callbackIdBuild('settings', [ 'role', 'teacher' ])),
+        ]
+      ]).reply_markup
+    })
     return
   }
 
@@ -583,28 +662,51 @@ bot.on(message('text'), async (ctx) => {
     })
   }
 
-  if (ctx.user.state === UserState.AskingGroup) {
-    const groups = await parser.getGroups({ display: ctx.message.text })
+  if (ctx.user.state === UserState.AskingFollowingEntity) {
+    const isStudent = ctx.user.role !== UserRole.Teacher
+    if (isStudent) {
+      const groups = await parser.getGroups({ display: ctx.message.text })
 
-    if (!groups.length) {
-      await ctx.reply('🩼 Таких групп я не видал. Попробуй другой номер')
-      return
+      if (!groups.length) {
+        return await ctx.reply('🩼 Таких групп я не видал. Попробуй другой номер')
+      }
+
+      ctx.user.choosing_groups = groups.map(g => ({ id: g.id, display: g.display }))
+      ctx.user.state = UserState.ChoosingFollowingEntity
+      await ctx.user.save()
+
+      await ctx.reply('👞 Выбери группу', {
+        reply_markup: batchButtons(
+          ctx.user.choosing_groups
+            .map(g => Markup.button.callback(g.display!, callbackIdBuild('select_entity', [ g.id! ])))
+        ).reply_markup
+      })
+
+      await ctx.reply('🤨', {
+        reply_markup: keyboards[ctx.user.state].resize().reply_markup
+      })
+    } else if (ctx.user.role === UserRole.Teacher) {
+      const teachers = await keeper.getTeachers({ name: ctx.message.text })
+
+      if (!teachers.length) {
+        return await ctx.reply('🫐 Таких я не видал. Попробуй написать другого преподавателя')
+      }
+
+      ctx.user.choosing_teachers = teachers
+      ctx.user.state = UserState.ChoosingFollowingEntity
+      await ctx.user.save()
+
+      await ctx.reply('👞 Выбери преподавателя', {
+        reply_markup: batchButtons(
+          ctx.user.choosing_teachers
+            .map(t => Markup.button.callback(t, callbackIdBuild('select_entity', [ t ])))
+        ).reply_markup
+      })
+
+      await ctx.reply('🤨', {
+        reply_markup: keyboards[ctx.user.state].resize().reply_markup
+      })
     }
-
-    ctx.user.choosing_groups = groups.map(g => ({ id: g.id, display: g.display }))
-    ctx.user.state = UserState.ChoosingGroup
-    await ctx.user.save()
-
-    await ctx.reply('👞 Выбери группу', {
-      reply_markup: batchButtons(
-        ctx.user.choosing_groups
-          .map(g => Markup.button.callback(g.display!, callbackIdBuild('select_group', [ g.id! ])))
-      ).reply_markup
-    })
-
-    await ctx.reply('🤨', {
-      reply_markup: keyboards[ctx.user.state].resize().reply_markup
-    })
   }
 })
 

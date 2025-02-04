@@ -175,6 +175,6 @@ process.on('uncaughtException', console.error)
 
 process.on('unhandledRejection', console.error)
 
-app.listen(3000, () => {
+app.listen(3000, '0.0.0.0', () => {
   console.log('Server started on port 3000')
 })

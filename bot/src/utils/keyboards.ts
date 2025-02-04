@@ -15,13 +15,13 @@ export enum WeeksArchiveType {
 export const CallbackIdSplitter = ':'
 
 export const keyboards = {
-  [UserState.AskingGroup]: Markup.keyboard([ [] ]),
-  [UserState.ChoosingGroup]: Markup.keyboard([ [ Markup.button.text('Отмена') ] ]),
+  [UserState.AskingFollowingEntity]: Markup.keyboard([ [] ]),
+  [UserState.ChoosingFollowingEntity]: Markup.keyboard([ [ Markup.button.text('Отмена') ] ]),
   [UserState.AskingWeekTeacher]: Markup.keyboard([ [ Markup.button.text('Отмена') ] ]),
   [UserState.AskingWeekGroup]: Markup.keyboard([ [ Markup.button.text('Отмена') ] ]),
   [UserState.MainMenu]: Markup.keyboard([
     [ Markup.button.text('Сегодня'), Markup.button.text('Завтра'), Markup.button.text('Неделя') ],
-    [ Markup.button.text('Другие расписания'), Markup.button.text('Сменить группу') ]
+    [ Markup.button.text('Другие расписания'), Markup.button.text('Настройки') ]
   ])
 }
 

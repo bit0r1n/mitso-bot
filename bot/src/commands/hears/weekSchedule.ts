@@ -1,5 +1,5 @@
 import { Markup } from 'telegraf'
-import { UserState } from '../../schemas/User'
+import { UserRole, UserState } from '../../schemas/User'
 import { AbstractHearsCommand, CommandContext, CommandUtils } from '../../utils/commandHelpers'
 import { batchButtons, callbackIdBuild, dateToCallback, WeeksArchiveType } from '../../utils/keyboards'
 import { getWeekStart, weekToHuman } from '../../keeper/helpers'
@@ -18,12 +18,14 @@ export class WeekScheduleCommand extends AbstractHearsCommand {
     weekStartDate.setTime(weekStartDate.getTime() + (3 * 60 ** 2 * 1e3))
 
     const weekStart = getWeekStart(weekStartDate)
-    const groupId = ctx.user.group!.id!
+    const isStudent = ctx.user.role !== UserRole.Teacher
+    const searchEntity = isStudent ? ctx.user.group!.id : ctx.user.teacher_name!
 
     const weeks = await keeper.getWeeks({
-      group: groupId,
+      group: isStudent ? searchEntity : undefined,
+      teachers: isStudent ? undefined : searchEntity
       // from: weekStart
-    })
+    }).catch(() => [] as Date[])
 
     const actualWeeks = weeks.filter(w => w.getTime() >= weekStart.getTime())
 
@@ -36,12 +38,17 @@ export class WeekScheduleCommand extends AbstractHearsCommand {
       actualWeeks.sort((a, b) => a.getTime() - b.getTime()).map((week, i) =>
         Markup.button.callback(
           weekToHuman(week),
-          callbackIdBuild('week', [ `${i}`, dateToCallback(week) ])
+          callbackIdBuild('week', [
+            `${i}`,
+            isStudent ? WeeksArchiveType.Group : WeeksArchiveType.Teacher,
+            searchEntity,
+            dateToCallback(week)
+          ])
         )),
       3,
       weeks.length !== actualWeeks.length
         ? [ [ Markup.button.callback('🚽 Архив недель', callbackIdBuild(
-          'week', [ 'archive', WeeksArchiveType.Group, groupId ])) ] ]
+          'week', [ 'archive', isStudent ? WeeksArchiveType.Group : WeeksArchiveType.Teacher, searchEntity ])) ] ]
         : []
     )
 
