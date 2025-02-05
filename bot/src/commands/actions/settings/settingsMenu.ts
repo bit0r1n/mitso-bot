@@ -1,5 +1,5 @@
 import { Composer, Markup } from 'telegraf'
-import { callbackIdBuild, callbackIdParse, CallbackIdSplitter, SuperDuperUpgradedContext } from '../../../utils'
+import { callbackIdParse, CallbackIdSplitter, inlineKeyboards, SuperDuperUpgradedContext } from '../../../utils'
 import { UserRole, UserState } from '../../../schemas/User'
 
 export const settingsMenuHandler = new Composer<SuperDuperUpgradedContext>()
@@ -30,15 +30,8 @@ settingsMenuHandler.action(new RegExp([ 'settings', '*' ].join(CallbackIdSplitte
         })
       }
 
-      const roleOptionsKeyboard = Markup.inlineKeyboard([
-        [
-          Markup.button.callback('Студент', callbackIdBuild('settings', [ 'role', 'student' ])),
-          Markup.button.callback('Преподаватель', callbackIdBuild('settings', [ 'role', 'teacher' ])),
-        ]
-      ])
-
       return await ctx.editMessageText('🤸 Выбери новую роль', {
-        reply_markup: roleOptionsKeyboard.reply_markup
+        reply_markup: inlineKeyboards.chooseRole.reply_markup
       })
     }
     case 'change_following': {

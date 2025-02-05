@@ -77,9 +77,9 @@ bot.catch((err) => console.error(err))
 if (process.env.WEBHOOK_DOMAIN?.length) {
   const secretToken = process.env.WEBHOOK_SECRET?.length ? process.env.WEBHOOK_SECRET : createSecret()
   const webhookDomain = process.env.WEBHOOK_DOMAIN!
-  const webhookPath = process.env.WEBHOOK_PATH?.length ?
-    process.env.WEBHOOK_PATH :
-    `/telegraf/${bot.secretPathComponent()}`
+  const webhookPath = process.env.WEBHOOK_PATH?.length
+    ? process.env.WEBHOOK_PATH
+    :`/telegraf/${bot.secretPathComponent()}`
   const webhookServerPort = process.env.WEBHOOK_SERVER_PORT?.length
     ? parseInt(process.env.WEBHOOK_SERVER_PORT)
     : 3000

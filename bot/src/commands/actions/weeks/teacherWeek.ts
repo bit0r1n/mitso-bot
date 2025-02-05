@@ -4,7 +4,7 @@ import {
   callbackIdBuild,
   callbackIdParse,
   dateToCallback,
-  keyboards,
+  replyKeyboards,
   SuperDuperUpgradedContext,
   WeeksArchiveType
 } from '../../../utils'
@@ -29,7 +29,7 @@ teacherWeekHandler.action(/teacher_week*/, async (ctx) => {
     await ctx.editMessageReplyMarkup(Markup.inlineKeyboard([ [] ]).reply_markup)
 
     await ctx.reply('🤨', {
-      reply_markup: keyboards[ctx.user.state].resize().reply_markup
+      reply_markup: replyKeyboards[ctx.user.state].resize().reply_markup
     })
 
     await ctx.editMessageText('🧄 Напиши инициалы преподавателя или его часть\n\nОбычно они в формате Фамилия И. О.')

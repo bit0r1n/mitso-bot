@@ -1,6 +1,14 @@
 import { Markup } from 'telegraf'
 import { UserRole, UserState } from '../../schemas/User'
-import { AbstractSlashCommand, batchButtons, callbackIdBuild, CommandUtils, keyboards, SlashCommandContext } from '../../utils'
+import {
+  AbstractSlashCommand,
+  batchButtons,
+  callbackIdBuild,
+  CommandUtils,
+  inlineKeyboards,
+  replyKeyboards,
+  SlashCommandContext
+} from '../../utils'
 
 export class StartCommand extends AbstractSlashCommand {
   constructor(utils: CommandUtils) {
@@ -11,12 +19,7 @@ export class StartCommand extends AbstractSlashCommand {
     if (ctx.newUser) {
       await ctx.reply('🍉 Привет, я могу тебе показывать расписание!\nТолько мне для этого нужно знать кто ты 😫')
       return await ctx.reply('🤨 Давай определимся от какого лица ты тут', {
-        reply_markup: Markup.inlineKeyboard([
-          [
-            Markup.button.callback('Студент', callbackIdBuild('settings', [ 'role', 'student' ])),
-            Markup.button.callback('Преподаватель', callbackIdBuild('settings', [ 'role', 'teacher' ])),
-          ]
-        ]).reply_markup
+        reply_markup: inlineKeyboards.chooseRole.reply_markup
       })
     }
   
@@ -25,7 +28,7 @@ export class StartCommand extends AbstractSlashCommand {
     switch (state) {
       case UserState.MainMenu: {
         return await ctx.reply('🍉 Хватай меню', {
-          reply_markup: keyboards[state].resize().reply_markup
+          reply_markup: replyKeyboards[state].resize().reply_markup
         })
       }
       case UserState.AskingFollowingEntity: {
@@ -33,7 +36,7 @@ export class StartCommand extends AbstractSlashCommand {
           ? 'Погоди, я пока жду от тебя номер группы'
           : 'Погоди, я пока жду от тебя инициалы преподавателя'
         return await ctx.reply('🍆 ' + askingText, {
-          reply_markup: keyboards[state].resize().reply_markup
+          reply_markup: replyKeyboards[state].resize().reply_markup
         })
       }
       case UserState.ChoosingFollowingEntity: {
@@ -54,13 +57,13 @@ export class StartCommand extends AbstractSlashCommand {
       }
       case UserState.AskingWeekGroup: {
         await ctx.reply('🥥 Напиши номер группы, расписание которой ты хочешь узнать', {
-          reply_markup: keyboards[state].resize().reply_markup
+          reply_markup: replyKeyboards[state].resize().reply_markup
         })
         return
       }
       case UserState.AskingWeekTeacher: {
         await ctx.reply('📛 Напиши инициалы преподавателя, расписание которого ты хочешь узнать', {
-          reply_markup: keyboards[state].resize().reply_markup
+          reply_markup: replyKeyboards[state].resize().reply_markup
         })
         return
       }

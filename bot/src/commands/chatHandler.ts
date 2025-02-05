@@ -1,5 +1,5 @@
 import { Composer, Markup } from 'telegraf'
-import { batchButtons, callbackIdBuild, keyboards, SuperDuperUpgradedContext } from '../utils'
+import { batchButtons, callbackIdBuild, inlineKeyboards, replyKeyboards, SuperDuperUpgradedContext } from '../utils'
 import { message } from 'telegraf/filters'
 import { UserRole, UserState } from '../schemas/User'
 import { Parser } from '../parser'
@@ -13,12 +13,7 @@ const keeper = new Keeper(process.env.KEEPER_URL!)
 chatHandler.on(message('text'), async (ctx) => {
   if (ctx.newUser) {
     await ctx.reply('🤯 Что-то я тебя не видал. Ладно, сейчас оформимся. Выбери кто ты', {
-      reply_markup: Markup.inlineKeyboard([
-        [
-          Markup.button.callback('Студент', callbackIdBuild('settings', [ 'role', 'student' ])),
-          Markup.button.callback('Преподаватель', callbackIdBuild('settings', [ 'role', 'teacher' ])),
-        ]
-      ]).reply_markup
+      reply_markup: inlineKeyboards.chooseRole.reply_markup
     })
     return
   }
@@ -35,7 +30,7 @@ chatHandler.on(message('text'), async (ctx) => {
     await ctx.user.save()
 
     ctx.reply('🤨', {
-      reply_markup: keyboards[ctx.user.state].resize().reply_markup
+      reply_markup: replyKeyboards[ctx.user.state].resize().reply_markup
     })
 
     await ctx.reply('🍍 Выбери группу', {
@@ -58,7 +53,7 @@ chatHandler.on(message('text'), async (ctx) => {
     await ctx.user.save()
 
     await ctx.reply('🤨', {
-      reply_markup: keyboards[ctx.user.state].resize().reply_markup
+      reply_markup: replyKeyboards[ctx.user.state].resize().reply_markup
     })
 
     await ctx.reply('🍍 Выбери преподавателя', {
@@ -90,7 +85,7 @@ chatHandler.on(message('text'), async (ctx) => {
       })
 
       await ctx.reply('🤨', {
-        reply_markup: keyboards[ctx.user.state].resize().reply_markup
+        reply_markup: replyKeyboards[ctx.user.state].resize().reply_markup
       })
     } else if (ctx.user.role === UserRole.Teacher) {
       const teachers = await keeper.getTeachers({ name: ctx.message.text })
@@ -111,7 +106,7 @@ chatHandler.on(message('text'), async (ctx) => {
       })
 
       await ctx.reply('🤨', {
-        reply_markup: keyboards[ctx.user.state].resize().reply_markup
+        reply_markup: replyKeyboards[ctx.user.state].resize().reply_markup
       })
     }
   }

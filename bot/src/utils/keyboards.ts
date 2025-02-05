@@ -14,7 +14,16 @@ export enum WeeksArchiveType {
 
 export const CallbackIdSplitter = ':'
 
-export const keyboards = {
+export const callbackIdBuild = (command: string, args?: string[]): string => {
+  return [ command, ...(args || []) ].join(CallbackIdSplitter)
+}
+
+export const callbackIdParse = (str: string) => str.split(CallbackIdSplitter)
+
+export const dateToCallback = (date: Date): string =>
+  `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate()}`
+
+export const replyKeyboards = {
   [UserState.AskingFollowingEntity]: Markup.keyboard([ [] ]),
   [UserState.ChoosingFollowingEntity]: Markup.keyboard([ [ Markup.button.text('Отмена') ] ]),
   [UserState.AskingWeekTeacher]: Markup.keyboard([ [ Markup.button.text('Отмена') ] ]),
@@ -22,6 +31,21 @@ export const keyboards = {
   [UserState.MainMenu]: Markup.keyboard([
     [ Markup.button.text('Сегодня'), Markup.button.text('Завтра'), Markup.button.text('Неделя') ],
     [ Markup.button.text('Другие расписания'), Markup.button.text('Настройки') ]
+  ])
+}
+
+export const inlineKeyboards = {
+  chooseRole: Markup.inlineKeyboard([
+    [
+      Markup.button.callback('Студент', callbackIdBuild('settings', [ 'role', 'student' ])),
+      Markup.button.callback('Преподаватель', callbackIdBuild('settings', [ 'role', 'teacher' ])),
+    ]
+  ]),
+  otherSchedules: Markup.inlineKeyboard([
+    [
+      Markup.button.callback('Преподаватель', callbackIdBuild('teacher_week')),
+      Markup.button.callback('Группа', callbackIdBuild('group_week'))
+    ]
   ])
 }
 
@@ -35,12 +59,3 @@ export const batchButtons = (buttons: InlineKeyboardButton[], rowSize = 3, extra
 
   return Markup.inlineKeyboard(rows)
 }
-
-export const callbackIdBuild = (command: string, args?: string[]): string => {
-  return [ command, ...(args || []) ].join(CallbackIdSplitter)
-}
-
-export const callbackIdParse = (str: string) => str.split(CallbackIdSplitter)
-
-export const dateToCallback = (date: Date): string =>
-  `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate()}`

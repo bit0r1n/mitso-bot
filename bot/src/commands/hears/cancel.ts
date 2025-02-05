@@ -1,5 +1,5 @@
 import { UserRole, UserState } from '../../schemas/User'
-import { AbstractHearsCommand, CommandContext, CommandUtils, keyboards } from '../../utils'
+import { AbstractHearsCommand, CommandContext, CommandUtils, replyKeyboards } from '../../utils'
 
 export class CancelCommand extends AbstractHearsCommand {
   constructor(utils: CommandUtils) {
@@ -19,7 +19,7 @@ export class CancelCommand extends AbstractHearsCommand {
         await ctx.user.save()
   
         await ctx.reply('🫠 ладн', {
-          reply_markup: keyboards[ctx.user.state].resize().reply_markup
+          reply_markup: replyKeyboards[ctx.user.state].resize().reply_markup
         })
       }
     } else if ([ UserState.AskingWeekTeacher, UserState.AskingWeekGroup ].includes(ctx.user.state)) {
@@ -27,7 +27,7 @@ export class CancelCommand extends AbstractHearsCommand {
       await ctx.user.save()
   
       await ctx.reply('👍 (ок (👍))', {
-        reply_markup: keyboards[ctx.user.state].resize().reply_markup
+        reply_markup: replyKeyboards[ctx.user.state].resize().reply_markup
       })
     }
   }

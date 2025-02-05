@@ -1,5 +1,5 @@
 import { Composer } from 'telegraf'
-import { callbackIdParse, CallbackIdSplitter, keyboards, SuperDuperUpgradedContext } from '../../../utils'
+import { callbackIdParse, CallbackIdSplitter, replyKeyboards, SuperDuperUpgradedContext } from '../../../utils'
 import { UserRole, UserState } from '../../../schemas/User'
 
 export const selectEntityHandler = new Composer<SuperDuperUpgradedContext>()
@@ -28,7 +28,7 @@ selectEntityHandler.action(new RegExp([ 'select_entity', '*' ].join(CallbackIdSp
     await ctx.deleteMessage().catch(() => {})
 
     return await ctx.replyWithMarkdownV2(`🫔 Выбрана группа *${group.display}*`, {
-      reply_markup: keyboards[ctx.user.state].resize().reply_markup
+      reply_markup: replyKeyboards[ctx.user.state].resize().reply_markup
     })
   } else {
     const teacher = ctx.user.choosing_teachers!.find(g => g === args[0])
@@ -50,7 +50,7 @@ selectEntityHandler.action(new RegExp([ 'select_entity', '*' ].join(CallbackIdSp
     await ctx.deleteMessage().catch(() => {})
 
     return await ctx.replyWithMarkdownV2(`🕺 Выбран преподаватель *${teacher.replace(/\./g, '\\.')}*`, {
-      reply_markup: keyboards[ctx.user.state].resize().reply_markup
+      reply_markup: replyKeyboards[ctx.user.state].resize().reply_markup
     })
   }
 })
