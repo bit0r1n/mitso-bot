@@ -66,17 +66,17 @@ export class Parser {
         let filterValue: string
 
         switch (key) {
-        case 'course':
-          filterValue = courseToRaw(filter[key]!)
-          break
-        case 'form':
-          filterValue = formToRaw(filter[key]!)
-          break
-        case 'faculty':
-          filterValue = facultyToRaw(filter[key]!)
-          break
-        default:
-          filterValue = filter[key]!
+          case 'course':
+            filterValue = courseToRaw(filter[key]!)
+            break
+          case 'form':
+            filterValue = formToRaw(filter[key]!)
+            break
+          case 'faculty':
+            filterValue = facultyToRaw(filter[key]!)
+            break
+          default:
+            filterValue = filter[key]!
         }
         
         url.searchParams.append(filterKey, filterValue)
@@ -102,17 +102,17 @@ export class Parser {
         let filterValue: string
 
         switch (key) {
-        case 'course':
-          filterValue = courseToRaw(filter[key]!)
-          break
-        case 'form':
-          filterValue = formToRaw(filter[key]!)
-          break
-        case 'faculty':
-          filterValue = facultyToRaw(filter[key]!)
-          break
-        default:
-          filterValue = filter[key]!
+          case 'course':
+            filterValue = courseToRaw(filter[key]!)
+            break
+          case 'form':
+            filterValue = formToRaw(filter[key]!)
+            break
+          case 'faculty':
+            filterValue = facultyToRaw(filter[key]!)
+            break
+          default:
+            filterValue = filter[key]!
         }
         
         url.searchParams.append(filterKey, filterValue)
@@ -145,17 +145,17 @@ export class Parser {
         let filterValue: string
 
         switch (key) {
-        case 'course':
-          filterValue = courseToRaw(groupFilter[key]!)
-          break
-        case 'form':
-          filterValue = formToRaw(groupFilter[key]!)
-          break
-        case 'faculty':
-          filterValue = facultyToRaw(groupFilter[key]!)
-          break
-        default:
-          filterValue = groupFilter[key]!
+          case 'course':
+            filterValue = courseToRaw(groupFilter[key]!)
+            break
+          case 'form':
+            filterValue = formToRaw(groupFilter[key]!)
+            break
+          case 'faculty':
+            filterValue = facultyToRaw(groupFilter[key]!)
+            break
+          default:
+            filterValue = groupFilter[key]!
         }
         
         url.searchParams.append(filterKey, filterValue)
@@ -181,17 +181,17 @@ export class Parser {
         let filterValue: string
 
         switch (key) {
-        case 'course':
-          filterValue = courseToRaw(groupFilter[key]!)
-          break
-        case 'form':
-          filterValue = formToRaw(groupFilter[key]!)
-          break
-        case 'faculty':
-          filterValue = facultyToRaw(groupFilter[key]!)
-          break
-        default:
-          filterValue = groupFilter[key]!
+          case 'course':
+            filterValue = courseToRaw(groupFilter[key]!)
+            break
+          case 'form':
+            filterValue = formToRaw(groupFilter[key]!)
+            break
+          case 'faculty':
+            filterValue = facultyToRaw(groupFilter[key]!)
+            break
+          default:
+            filterValue = groupFilter[key]!
         }
         
         url.searchParams.append(filterKey, filterValue)
