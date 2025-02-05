@@ -3,7 +3,9 @@ import * as mongoose from 'mongoose'
 import { GetWeeksOptions, Lesson, LessonFilterOptions } from './schemas/Lesson'
 import { Parser } from './api'
 import { Teacher } from './schemas/Teacher'
-import { parseJob } from './cron'
+import { indexClassrooms, parseLessons } from './cron'
+import { FilterQuery } from 'mongoose'
+import { Classroom, IClassroom } from './schemas/Classroom'
 
 // //                        d   h&m      s->ms
 // const parseJobCooldown = 24 * 60 ** 2 * 1e3
@@ -22,6 +24,11 @@ app.get('/', (req, res) => {
 
 let parseJobRunning = false
 // let parseJobWaitingStart: number | undefined
+
+app.get('/index_classrooms', async (req, res) => {
+  res.status(202).json({ result: 'Yeah' })
+  await indexClassrooms()
+})
 
 app.get('/parse_job', async (req, res) => {
   // const cooldown = parseJobWaitingStart
@@ -46,7 +53,7 @@ app.get('/parse_job', async (req, res) => {
   parseJobRunning = true
 
   try {
-    await parseJob()
+    await parseLessons()
   } finally {
     parseJobRunning = false
   }
@@ -168,7 +175,34 @@ app.get('/teachers', async (req, res) => {
     : await Teacher.find()
 
   res.json({ result: teachers.map(t => t.name) })
+})
 
+app.get('/classrooms', async (req, res) => {
+  const locations = req.query.location as string | string[] | undefined
+  const floor = req.query.floor as string | string[] | undefined
+  const isComputer = req.query.is_computer !== undefined ? !!req.query.is_computer : undefined
+
+  const filter: FilterQuery<IClassroom> = {}
+
+  if (locations !== undefined) {
+    filter.location = Array.isArray(locations)
+      ? { $in: locations }
+      : locations
+  }
+
+  if (floor !== undefined) {
+    filter.floor = Array.isArray(floor)
+      ? { $in: floor }
+      : floor
+  }
+
+  if (isComputer !== undefined) {
+    filter.is_computer = isComputer
+  }
+
+  const classrooms = await Classroom.find(filter)
+
+  res.json({ result: classrooms })
 })
 
 process.on('uncaughtException', console.error)
