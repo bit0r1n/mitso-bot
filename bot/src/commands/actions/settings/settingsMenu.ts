@@ -17,9 +17,9 @@ settingsMenuHandler.action(new RegExp([ 'settings', '*' ].join(CallbackIdSplitte
         ctx.user.isNew = false
         await ctx.user.save()
 
-        const askingText = role === UserRole.Student ?
-          'Теперь напиши свою группу' :
-          'Теперь напиши инициалы преподавателя (или их часть)'
+        const askingText = role === UserRole.Student
+          ? 'Теперь напиши свою группу'
+          : 'Теперь напиши инициалы преподавателя (или их часть)'
 
         await ctx.reply('🤨', {
           reply_markup: Markup.removeKeyboard().reply_markup

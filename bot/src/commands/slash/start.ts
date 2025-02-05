@@ -29,25 +29,25 @@ export class StartCommand extends AbstractSlashCommand {
         })
       }
       case UserState.AskingFollowingEntity: {
-        const askingText = ctx.user.role !== UserRole.Teacher ?
-          'Погоди, я пока жду от тебя номер группы' :
-          'Погоди, я пока жду от тебя инициалы преподавателя'
+        const askingText = ctx.user.role !== UserRole.Teacher
+          ? 'Погоди, я пока жду от тебя номер группы'
+          : 'Погоди, я пока жду от тебя инициалы преподавателя'
         return await ctx.reply('🍆 ' + askingText, {
           reply_markup: keyboards[state].resize().reply_markup
         })
       }
       case UserState.ChoosingFollowingEntity: {
-        const buttons = ctx.user.role !== UserRole.Teacher ?
-        ctx.user.choosing_groups!
-          .map(g => Markup.button.callback(
-            g.display,
-            callbackIdBuild('select_entity', [ g.id ])
-          )) :
-        ctx.user.choosing_teachers!
-          .map(t => Markup.button.callback(
-            t,
-            callbackIdBuild('select_entity', [ t ])
-          ))
+        const buttons = ctx.user.role !== UserRole.Teacher
+          ? ctx.user.choosing_groups!
+            .map(g => Markup.button.callback(
+              g.display,
+              callbackIdBuild('select_entity', [ g.id ])
+            ))
+          : ctx.user.choosing_teachers!
+            .map(t => Markup.button.callback(
+              t,
+              callbackIdBuild('select_entity', [ t ])
+            ))
         return await ctx.reply('👞 Выбери ' + (ctx.user.role === UserRole.Teacher ? 'преподавателя' : 'группу'), {
           reply_markup: batchButtons(buttons).reply_markup
         })

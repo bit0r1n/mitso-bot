@@ -80,9 +80,9 @@ if (process.env.WEBHOOK_DOMAIN?.length) {
   const webhookPath = process.env.WEBHOOK_PATH?.length ?
     process.env.WEBHOOK_PATH :
     `/telegraf/${bot.secretPathComponent()}`
-  const webhookServerPort = process.env.WEBHOOK_SERVER_PORT?.length ?
-    parseInt(process.env.WEBHOOK_SERVER_PORT) :
-    3000
+  const webhookServerPort = process.env.WEBHOOK_SERVER_PORT?.length
+    ? parseInt(process.env.WEBHOOK_SERVER_PORT)
+    : 3000
 
   console.log(
     'Startin bot in WEBHOOK MODE, startin server %s, Telegram will know as %s',
