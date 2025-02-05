@@ -2,8 +2,8 @@ import { MiddlewareFn, NarrowedContext } from 'telegraf'
 import { MountMap } from 'telegraf/typings/telegram-types'
 import { SuperDuperUpgradedContext } from './context'
 import { Triggers } from 'telegraf/typings/composer'
-import { Keeper } from '../keeper/api'
-import { Parser } from '../parser/api'
+import { Keeper } from '../keeper'
+import { Parser } from '../parser'
 
 interface CommandContextExtn {
   command: string
@@ -14,9 +14,6 @@ interface CommandContextExtn {
 export type CommandMiddleware = MiddlewareFn<NarrowedContext<SuperDuperUpgradedContext, MountMap['text']>>
 export type CommandContext = Parameters<CommandMiddleware>[0]
 export type SlashCommandContext = CommandContext & CommandContextExtn
-
-export type ActionMiddleware = MiddlewareFn<NarrowedContext<SuperDuperUpgradedContext, MountMap['callback_query']>>
-export type ActionContext = Parameters<ActionMiddleware>[0]
 
 export interface CommandUtils {
   keeper: Keeper

@@ -1,4 +1,4 @@
-import { BaseApi } from '../utils/BaseApi'
+import { BaseApi } from '../utils'
 import { courseToIdMap, facultyToIdMap, formToIdMap } from './helpers'
 import { GetGroupsOptions, Group, RawGroup } from './interfaces'
 

@@ -13,7 +13,7 @@ services:
       test: curl --fail http://parser:3000 || exit 1
       interval: 5s
       timeout: 10s
-      retries: 10
+      retries: 50
   keeper:
     build: ./keeper
     restart: always

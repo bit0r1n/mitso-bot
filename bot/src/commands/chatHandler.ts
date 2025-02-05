@@ -1,0 +1,118 @@
+import { Composer, Markup } from 'telegraf'
+import { batchButtons, callbackIdBuild, keyboards, SuperDuperUpgradedContext } from '../utils'
+import { message } from 'telegraf/filters'
+import { UserRole, UserState } from '../schemas/User'
+import { Parser } from '../parser'
+import { Keeper } from '../keeper'
+
+export const chatHandler = new Composer<SuperDuperUpgradedContext>()
+
+const parser = new Parser(process.env.PARSER_URL!)
+const keeper = new Keeper(process.env.KEEPER_URL!)
+
+chatHandler.on(message('text'), async (ctx) => {
+  if (ctx.newUser) {
+    await ctx.reply('🤯 Что-то я тебя не видал. Ладно, сейчас оформимся. Выбери кто ты', {
+      reply_markup: Markup.inlineKeyboard([
+        [
+          Markup.button.callback('Студент', callbackIdBuild('settings', [ 'role', 'student' ])),
+          Markup.button.callback('Преподаватель', callbackIdBuild('settings', [ 'role', 'teacher' ])),
+        ]
+      ]).reply_markup
+    })
+    return
+  }
+
+  if (ctx.user.state === UserState.AskingWeekGroup) {
+    const groups = await parser.getGroups({ display: ctx.message.text })
+
+    if (!groups.length) {
+      await ctx.reply('🥺 Такой группы не нашлось. Попробуй другой номер группы')
+      return
+    }
+
+    ctx.user.state = UserState.MainMenu
+    await ctx.user.save()
+
+    ctx.reply('🤨', {
+      reply_markup: keyboards[ctx.user.state].resize().reply_markup
+    })
+
+    await ctx.reply('🍍 Выбери группу', {
+      reply_markup: batchButtons(
+        groups.map(g => Markup.button.callback(g.display, callbackIdBuild('group_week', [ g.id! ]))),
+        3
+      ).reply_markup
+    })
+  }
+
+  if (ctx.user.state === UserState.AskingWeekTeacher) {
+    const teachers: string[] = await keeper.getTeachers({ name: ctx.message.text })
+
+    if (!teachers.length) {
+      await ctx.reply('🥺 Такого преподавателя не нашлось. Попробуй написать по-другому')
+      return
+    }
+
+    ctx.user.state = UserState.MainMenu
+    await ctx.user.save()
+
+    await ctx.reply('🤨', {
+      reply_markup: keyboards[ctx.user.state].resize().reply_markup
+    })
+
+    await ctx.reply('🍍 Выбери преподавателя', {
+      reply_markup: batchButtons(
+        teachers.map(t => Markup.button.callback(t, callbackIdBuild('teacher_week', [ t ]))),
+        3
+      ).reply_markup
+    })
+  }
+
+  if (ctx.user.state === UserState.AskingFollowingEntity) {
+    const isStudent = ctx.user.role !== UserRole.Teacher
+    if (isStudent) {
+      const groups = await parser.getGroups({ display: ctx.message.text })
+
+      if (!groups.length) {
+        return await ctx.reply('🩼 Таких групп я не видал. Попробуй другой номер')
+      }
+
+      ctx.user.choosing_groups = groups.map(g => ({ id: g.id, display: g.display }))
+      ctx.user.state = UserState.ChoosingFollowingEntity
+      await ctx.user.save()
+
+      await ctx.reply('👞 Выбери группу', {
+        reply_markup: batchButtons(
+          ctx.user.choosing_groups
+            .map(g => Markup.button.callback(g.display!, callbackIdBuild('select_entity', [ g.id! ])))
+        ).reply_markup
+      })
+
+      await ctx.reply('🤨', {
+        reply_markup: keyboards[ctx.user.state].resize().reply_markup
+      })
+    } else if (ctx.user.role === UserRole.Teacher) {
+      const teachers = await keeper.getTeachers({ name: ctx.message.text })
+
+      if (!teachers.length) {
+        return await ctx.reply('🫐 Таких я не видал. Попробуй написать другого преподавателя')
+      }
+
+      ctx.user.choosing_teachers = teachers
+      ctx.user.state = UserState.ChoosingFollowingEntity
+      await ctx.user.save()
+
+      await ctx.reply('👞 Выбери преподавателя', {
+        reply_markup: batchButtons(
+          ctx.user.choosing_teachers
+            .map(t => Markup.button.callback(t, callbackIdBuild('select_entity', [ t ])))
+        ).reply_markup
+      })
+
+      await ctx.reply('🤨', {
+        reply_markup: keyboards[ctx.user.state].resize().reply_markup
+      })
+    }
+  }
+})

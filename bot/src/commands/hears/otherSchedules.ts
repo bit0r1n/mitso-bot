@@ -1,7 +1,6 @@
 import { Markup } from 'telegraf'
 import { UserState } from '../../schemas/User'
-import { AbstractHearsCommand, CommandContext, CommandUtils } from '../../utils/commandHelpers'
-import { callbackIdBuild } from '../../utils/keyboards'
+import { AbstractHearsCommand, callbackIdBuild, CommandContext, CommandUtils } from '../../utils'
 
 export class OtherSchedulesCommand extends AbstractHearsCommand {
   constructor(utils: CommandUtils) {

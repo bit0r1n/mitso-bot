@@ -1,6 +1,5 @@
 import { UserRole, UserState } from '../../schemas/User'
-import { AbstractHearsCommand, CommandContext, CommandUtils } from '../../utils/commandHelpers'
-import { keyboards } from '../../utils/keyboards'
+import { AbstractHearsCommand, CommandContext, CommandUtils, keyboards } from '../../utils'
 
 export class CancelCommand extends AbstractHearsCommand {
   constructor(utils: CommandUtils) {

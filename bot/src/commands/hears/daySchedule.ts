@@ -1,6 +1,6 @@
-import { lessonsToMessage } from '../../keeper/helpers'
+import { lessonsToMessage } from '../../keeper'
 import { UserRole, UserState } from '../../schemas/User'
-import { AbstractHearsCommand, CommandContext, CommandUtils } from '../../utils/commandHelpers'
+import { AbstractHearsCommand, CommandContext, CommandUtils } from '../../utils'
 
 export class DayScheduleCommand extends AbstractHearsCommand {
   constructor(utils: CommandUtils) {

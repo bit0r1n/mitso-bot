@@ -1,4 +1,4 @@
-import { Group } from '../parser/interfaces'
+import { Group } from '../parser'
 import { Lesson, LessonGroups, LessonTime, LessonType } from './interfaces'
 
 // const plural = (n: number, plurals: string[]) => plurals[(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)]

@@ -1,8 +1,15 @@
 import { Markup } from 'telegraf'
 import { UserRole, UserState } from '../../schemas/User'
-import { AbstractHearsCommand, CommandContext, CommandUtils } from '../../utils/commandHelpers'
-import { batchButtons, callbackIdBuild, dateToCallback, WeeksArchiveType } from '../../utils/keyboards'
-import { getWeekStart, weekToHuman } from '../../keeper/helpers'
+import {
+  AbstractHearsCommand,
+  batchButtons,
+  callbackIdBuild,
+  CommandContext,
+  CommandUtils,
+  dateToCallback,
+  WeeksArchiveType
+} from '../../utils'
+import { getWeekStart, weekToHuman } from '../../keeper'
 
 export class WeekScheduleCommand extends AbstractHearsCommand {
   constructor(utils: CommandUtils) {

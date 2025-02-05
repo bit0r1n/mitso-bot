@@ -1,5 +1,5 @@
-import { WeeksSearchOptions, LessonsSearchOptions, Lesson, RawLesson, TeacherSearchOptions } from './interfaces'
-import { BaseApi } from '../utils/BaseApi'
+import { Lesson, LessonsSearchOptions, RawLesson, TeacherSearchOptions, WeeksSearchOptions } from './interfaces'
+import { BaseApi } from '../utils'
 
 export class Keeper extends BaseApi {
   constructor(url: string) {

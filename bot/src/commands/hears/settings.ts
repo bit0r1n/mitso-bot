@@ -1,6 +1,5 @@
 import { UserRole, UserState } from '../../schemas/User'
-import { AbstractHearsCommand, CommandContext, CommandUtils } from '../../utils/commandHelpers'
-import { callbackIdBuild } from '../../utils/keyboards'
+import { AbstractHearsCommand, callbackIdBuild, CommandContext, CommandUtils } from '../../utils'
 import { Markup } from 'telegraf'
 
 export class SettingsCommand extends AbstractHearsCommand {
