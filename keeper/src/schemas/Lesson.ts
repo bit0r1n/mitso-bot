@@ -1,5 +1,5 @@
 import * as mongoose from 'mongoose'
-import { LessonTime, LessonType } from '../api/interfaces'
+import { LessonTime, LessonType } from '../api'
 
 function getWeekStart(date: Date = new Date()) {
   const dayOfWeek = date.getDay()

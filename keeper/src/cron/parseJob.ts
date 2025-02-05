@@ -1,9 +1,7 @@
-import { Parser } from '../api/Parser'
-import { lessonToScheme } from '../api/helpers'
-import { Day } from '../api/interfaces'
+import { Day, lessonToScheme, Parser } from '../api'
 import { Lesson } from '../schemas/Lesson'
 import { Teacher } from '../schemas/Teacher'
-import { getWeekStart } from '../utils/getWeekStart'
+import { getWeekStart } from '../utils'
 
 export async function parseJob() {
   const parser = new Parser()

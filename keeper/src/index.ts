@@ -1,9 +1,9 @@
 import express from 'express'
 import * as mongoose from 'mongoose'
 import { GetWeeksOptions, Lesson, LessonFilterOptions } from './schemas/Lesson'
-import { Parser } from './api/Parser'
+import { Parser } from './api'
 import { Teacher } from './schemas/Teacher'
-import { parseJob } from './cron/parseJob'
+import { parseJob } from './cron'
 
 // //                        d   h&m      s->ms
 // const parseJobCooldown = 24 * 60 ** 2 * 1e3
