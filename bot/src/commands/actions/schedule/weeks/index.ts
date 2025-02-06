@@ -8,7 +8,7 @@ import { weeksArchiveHandler } from './weeksArchive'
 export const weeksHandler = new Composer<SuperDuperUpgradedContext>()
 
 weeksHandler
-  .use(selfWeekHandler)
   .use(groupWeekHandler)
+  .use(selfWeekHandler)
   .use(teacherWeekHandler)
   .use(weeksArchiveHandler)

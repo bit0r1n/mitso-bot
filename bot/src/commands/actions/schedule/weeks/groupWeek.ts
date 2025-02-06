@@ -17,7 +17,7 @@ export const groupWeekHandler = new Composer<SuperDuperUpgradedContext>()
 const parser = new Parser(process.env.PARSER_URL!)
 const keeper = new Keeper(process.env.KEEPER_URL!)
 
-groupWeekHandler.action(/group_week*/, async (ctx) => {
+groupWeekHandler.action(/^group_week*/, async (ctx) => {
   const [ , ...args ] = callbackIdParse(ctx.match.input)
   const [ groupId, weekStartRaw ] = args
 
@@ -107,7 +107,6 @@ groupWeekHandler.action(/group_week*/, async (ctx) => {
       await ctx.answerCbQuery()
       await ctx.editMessageReplyMarkup(Markup.inlineKeyboard([ [] ]).reply_markup)
       return await ctx.editMessageText(`🥥 Расписания на неделю для ${group.display} нету`)
-
     }
 
     await ctx.answerCbQuery()

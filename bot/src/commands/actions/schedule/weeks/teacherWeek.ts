@@ -17,7 +17,7 @@ export const teacherWeekHandler = new Composer<SuperDuperUpgradedContext>()
 const parser = new Parser(process.env.PARSER_URL!)
 const keeper = new Keeper(process.env.KEEPER_URL!)
 
-teacherWeekHandler.action(/teacher_week*/, async (ctx) => {
+teacherWeekHandler.action(/^teacher_week*/, async (ctx) => {
   const [ , ...args ] = callbackIdParse(ctx.match.input)
   const [ teacherName, weekStartRaw ] = args
 

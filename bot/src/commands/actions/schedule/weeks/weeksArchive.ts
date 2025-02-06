@@ -19,7 +19,7 @@ export const weeksArchiveHandler = new Composer<SuperDuperUpgradedContext>()
 const parser = new Parser(process.env.PARSER_URL!)
 const keeper = new Keeper(process.env.KEEPER_URL!)
 
-weeksArchiveHandler.action(new RegExp([ 'week', 'archive', '*' ].join(CallbackIdSplitter)), async (ctx) => {
+weeksArchiveHandler.action(new RegExp([ '^week', 'archive', '*' ].join(CallbackIdSplitter)), async (ctx) => {
   const [ , ...args ] = callbackIdParse(ctx.match.input)
   const [ , entityType, entityId, week, action, pageString ] = args
 

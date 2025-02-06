@@ -9,7 +9,7 @@ export const selfWeekHandler = new Composer<SuperDuperUpgradedContext>()
 const parser = new Parser(process.env.PARSER_URL!)
 const keeper = new Keeper(process.env.KEEPER_URL!)
 
-selfWeekHandler.action(new RegExp([ 'week', '\\d+', '*' ].join(CallbackIdSplitter)), async (ctx) => {
+selfWeekHandler.action(new RegExp([ '^week', '\\d+', '*' ].join(CallbackIdSplitter)), async (ctx) => {
   const [ , ...args ] = callbackIdParse(ctx.match.input)
   const [ , entityType, entityId, weekStartRaw ] = args
 
