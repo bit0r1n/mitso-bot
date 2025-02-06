@@ -1,5 +1,5 @@
 import { Group } from '../parser'
-import { Lesson, LessonGroups, LessonTime, LessonType } from './interfaces'
+import { ClassroomLocation, Lesson, LessonGroups, LessonTime, LessonType } from './interfaces'
 
 // const plural = (n: number, plurals: string[]) => plurals[(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)]
 
@@ -30,41 +30,41 @@ export function getWeekStart(date: Date = new Date()) {
 
 export const lessonTimeToHuman = (time: LessonTime): string => {
   switch (time) {
-  case LessonTime.First:
-    return '08:00 - 9:25'
-  case LessonTime.Second:
-    return '09:35 - 11:00'
-  case LessonTime.Third:
-    return '11:10 - 12:35'
-  case LessonTime.Fourth:
-    return '13:05 - 14:30'
-  case LessonTime.Fifth:
-    return '14:40 - 16:05'
-  case LessonTime.Sixth:
-    return '16:35 - 18:00'
-  case LessonTime.Seventh:
-    return '18:10 - 19:35'
-  case LessonTime.Eighth:
-    return '19:45 - 21:10'
+    case LessonTime.First:
+      return '08:00 - 09:25'
+    case LessonTime.Second:
+      return '09:35 - 11:00'
+    case LessonTime.Third:
+      return '11:10 - 12:35'
+    case LessonTime.Fourth:
+      return '13:05 - 14:30'
+    case LessonTime.Fifth:
+      return '14:40 - 16:05'
+    case LessonTime.Sixth:
+      return '16:35 - 18:00'
+    case LessonTime.Seventh:
+      return '18:10 - 19:35'
+    case LessonTime.Eighth:
+      return '19:45 - 21:10'
   }
 }
 
 export const lessonTypeToHuman = (type: LessonType): string => {
   switch (type) {
-  case LessonType.Lecture:
-    return 'Лекция'
-  case LessonType.Practice:
-    return 'Практика'
-  case LessonType.Laboratory:
-    return 'Лабораторная'
-  case LessonType.CreditCourse:
-    return 'Зачет'
-  case LessonType.Consultation:
-    return 'Консультация'
-  case LessonType.Exam:
-    return 'Экзамен'
-  case LessonType.CourseProject:
-    return 'Курсовая'
+    case LessonType.Lecture:
+      return 'Лекция'
+    case LessonType.Practice:
+      return 'Практика'
+    case LessonType.Laboratory:
+      return 'Лабораторная'
+    case LessonType.CreditCourse:
+      return 'Зачет'
+    case LessonType.Consultation:
+      return 'Консультация'
+    case LessonType.Exam:
+      return 'Экзамен'
+    case LessonType.CourseProject:
+      return 'Курсовая'
   }
 }
 
@@ -154,5 +154,16 @@ export const weekToHuman = (weekStart: Date, from = getWeekStart(), incrementDay
     return `${weekStart.getDate().toString().padStart(2, '0')}.` +
       `${(weekStart.getMonth() + 1).toString().padStart(2, '0')}.` +
       `${weekStart.getUTCFullYear()}`
+  }
+}
+
+export const classroomLocationToHuman = (location: ClassroomLocation): string => {
+  switch (location) {
+    case ClassroomLocation.NewBuilding:
+      return 'Новый корпус'
+    case ClassroomLocation.OldBuilding:
+      return 'Старый корпус'
+    case ClassroomLocation.Dormitory:
+      return 'Общежитие'
   }
 }

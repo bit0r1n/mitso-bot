@@ -57,3 +57,22 @@ export type Lesson = Omit<RawLesson, 'date'> & {
 export type LessonGroups = Omit<Lesson, 'group'> & {
   groups: string[]
 }
+
+export enum ClassroomLocation {
+  NewBuilding,
+  OldBuilding,
+  Dormitory
+}
+
+export interface Classroom {
+  name: string
+  location: ClassroomLocation
+  floor: number
+  is_computer: boolean
+}
+
+export interface ClassroomSearchOptions {
+  location?: ClassroomLocation | ClassroomLocation[]
+  floor?: number | number[]
+  is_computer?: boolean
+}

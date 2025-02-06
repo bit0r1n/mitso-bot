@@ -8,11 +8,11 @@ import {
   SuperDuperUpgradedContext,
   WeeksArchiveAction,
   WeeksArchiveType
-} from '../../../utils'
+} from '../../../../utils'
 import { Composer, Markup } from 'telegraf'
-import { getWeekStart, Keeper, lessonsToMessage, weekToHuman } from '../../../keeper'
+import { getWeekStart, Keeper, lessonsToMessage, weekToHuman } from '../../../../keeper'
 import { InlineKeyboardButton } from 'telegraf/types'
-import { Parser } from '../../../parser'
+import { Parser } from '../../../../parser'
 
 export const weeksArchiveHandler = new Composer<SuperDuperUpgradedContext>()
 

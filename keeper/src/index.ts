@@ -180,7 +180,7 @@ app.get('/teachers', async (req, res) => {
 app.get('/classrooms', async (req, res) => {
   const locations = req.query.location as string | string[] | undefined
   const floor = req.query.floor as string | string[] | undefined
-  const isComputer = req.query.is_computer !== undefined ? !!req.query.is_computer : undefined
+  const isComputer = req.query.is_computer !== undefined ? req.query.is_computer === 'true' : undefined
 
   const filter: FilterQuery<IClassroom> = {}
 

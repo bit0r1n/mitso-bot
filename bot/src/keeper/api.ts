@@ -1,4 +1,12 @@
-import { Lesson, LessonsSearchOptions, RawLesson, TeacherSearchOptions, WeeksSearchOptions } from './interfaces'
+import {
+  Classroom,
+  ClassroomSearchOptions,
+  Lesson,
+  LessonsSearchOptions,
+  RawLesson,
+  TeacherSearchOptions,
+  WeeksSearchOptions
+} from './interfaces'
 import { BaseApi } from '../utils'
 
 export class Keeper extends BaseApi {
@@ -75,5 +83,25 @@ export class Keeper extends BaseApi {
     }
 
     return await this.request<string[]>('teachers', query)
+  }
+
+  async getClassrooms(options?: ClassroomSearchOptions): Promise<Classroom[]> {
+    const query = new URLSearchParams()
+
+    if (options?.location !== undefined) {
+      (Array.isArray(options.location) ? options.location : [ options.location ])
+        .forEach(location => query.append('location', location.toString()))
+    }
+
+    if (options?.floor !== undefined) {
+      (Array.isArray(options.floor) ? options.floor : [ options.floor ])
+        .forEach(floor => query.append('floor', floor.toString()))
+    }
+
+    if (options?.is_computer !== undefined) {
+      query.set('is_computer', options.is_computer.toString())
+    }
+
+    return await this.request<Classroom[]>('classrooms', query)
   }
 }

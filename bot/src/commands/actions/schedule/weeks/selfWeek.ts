@@ -1,8 +1,8 @@
 import { Composer } from 'telegraf'
-import { callbackIdParse, CallbackIdSplitter, SuperDuperUpgradedContext, WeeksArchiveType } from '../../../utils'
-import { Parser } from '../../../parser'
-import { Keeper, lessonsToMessage } from '../../../keeper'
-import { UserRole } from '../../../schemas/User'
+import { callbackIdParse, CallbackIdSplitter, SuperDuperUpgradedContext, WeeksArchiveType } from '../../../../utils'
+import { Parser } from '../../../../parser'
+import { Keeper, lessonsToMessage } from '../../../../keeper'
+import { UserRole } from '../../../../schemas/User'
 
 export const selfWeekHandler = new Composer<SuperDuperUpgradedContext>()
 

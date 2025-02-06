@@ -1,4 +1,4 @@
-import { Telegraf } from 'telegraf'
+import { session, Telegraf } from 'telegraf'
 import * as mongoose from 'mongoose'
 import { CommandUtils, createSecret, SuperDuperUpgradedContext } from './utils'
 import { User, UserState } from './schemas/User'
@@ -6,7 +6,7 @@ import { Parser } from './parser'
 import { Keeper } from './keeper'
 import { hearsCommands } from './commands/hears'
 import { slashCommands } from './commands/slash'
-import { weeksHandler } from './commands/actions/weeks'
+import { classroomScheduleMasterHandler, weeksHandler } from './commands/actions/schedule'
 import { settingsHandler } from './commands/actions/settings'
 import { chatHandler } from './commands/chatHandler'
 
@@ -27,6 +27,8 @@ const commandUtilsObject: CommandUtils = {
 }
 const registeredHearsCommands = hearsCommands.map((c) => new c(commandUtilsObject))
 const registeredSlashCommands = slashCommands.map((c) => new c(commandUtilsObject))
+
+bot.use(session())
 
 bot.use(async (ctx, next) => {
   if (!ctx.from) return
@@ -66,6 +68,7 @@ for (const command of registeredHearsCommands) {
 
 bot
   .use(weeksHandler)
+  .use(classroomScheduleMasterHandler)
   .use(settingsHandler)
   .use(chatHandler)
 
