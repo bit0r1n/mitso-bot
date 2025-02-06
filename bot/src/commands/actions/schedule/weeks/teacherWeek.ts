@@ -7,10 +7,10 @@ import {
   replyKeyboards,
   SuperDuperUpgradedContext,
   WeeksArchiveType
-} from '../../../utils'
-import { Parser } from '../../../parser'
-import { getWeekStart, Keeper, lessonsToMessage, weekToHuman } from '../../../keeper'
-import { UserState } from '../../../schemas/User'
+} from '../../../../utils'
+import { Parser } from '../../../../parser'
+import { getWeekStart, Keeper, lessonsToMessage, weekToHuman } from '../../../../keeper'
+import { UserState } from '../../../../schemas/User'
 
 export const teacherWeekHandler = new Composer<SuperDuperUpgradedContext>()
 

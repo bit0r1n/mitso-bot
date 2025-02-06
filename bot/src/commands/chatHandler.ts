@@ -19,11 +19,14 @@ chatHandler.on(message('text'), async (ctx) => {
   }
 
   if (ctx.user.state === UserState.AskingWeekGroup) {
+    if (ctx.message.text.length < 2) {
+      return await ctx.reply('😨 Давай конкретнее, слишком маленький запрос')
+    }
+
     const groups = await parser.getGroups({ display: ctx.message.text })
 
     if (!groups.length) {
-      await ctx.reply('🥺 Такой группы не нашлось. Попробуй другой номер группы')
-      return
+      return await ctx.reply('🥺 Такой группы не нашлось. Попробуй другой номер группы')
     }
 
     ctx.user.state = UserState.MainMenu
@@ -42,6 +45,10 @@ chatHandler.on(message('text'), async (ctx) => {
   }
 
   if (ctx.user.state === UserState.AskingWeekTeacher) {
+    if (ctx.message.text.length < 3) {
+      return await ctx.reply('😨 Давай конкретнее, слишком маленький запрос')
+    }
+
     const teachers: string[] = await keeper.getTeachers({ name: ctx.message.text })
 
     if (!teachers.length) {
@@ -65,6 +72,10 @@ chatHandler.on(message('text'), async (ctx) => {
   }
 
   if (ctx.user.state === UserState.AskingFollowingEntity) {
+    if (ctx.message.text.length < 2) {
+      return await ctx.reply('😨 Давай конкретнее, слишком маленький запрос')
+    }
+
     const isStudent = ctx.user.role !== UserRole.Teacher
     if (isStudent) {
       const groups = await parser.getGroups({ display: ctx.message.text })

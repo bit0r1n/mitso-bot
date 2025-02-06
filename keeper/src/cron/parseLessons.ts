@@ -2,8 +2,9 @@ import { Day, lessonToScheme, Parser } from '../api'
 import { Lesson } from '../schemas/Lesson'
 import { Teacher } from '../schemas/Teacher'
 import { getWeekStart } from '../utils'
+import { indexClassrooms } from './indexClassrooms'
 
-export async function parseJob() {
+export async function parseLessons() {
   const parser = new Parser()
 
   console.debug('Getting groups...')
@@ -90,6 +91,9 @@ export async function parseJob() {
   parsedTeachers.splice(0, parsedTeachers.length)
   teachers.splice(0, teachers.length)
   teachersToSave.splice(0, teachersToSave.length)
+
+  console.debug('Indexing classrooms...')
+  await indexClassrooms()
 
   console.debug('Done')
 }

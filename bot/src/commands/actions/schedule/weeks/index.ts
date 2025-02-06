@@ -1,5 +1,5 @@
 import { Composer } from 'telegraf'
-import { SuperDuperUpgradedContext } from '../../../utils'
+import { SuperDuperUpgradedContext } from '../../../../utils'
 import { groupWeekHandler } from './groupWeek'
 import { selfWeekHandler } from './selfWeek'
 import { teacherWeekHandler } from './teacherWeek'

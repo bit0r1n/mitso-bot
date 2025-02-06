@@ -12,6 +12,11 @@ export enum WeeksArchiveType {
   Teacher = 'tc'
 }
 
+export enum ClassroomScheduleType {
+  Default = 'def',
+  Free = 'free'
+}
+
 export const CallbackIdSplitter = ':'
 
 export const callbackIdBuild = (command: string, args?: string[]): string => {
@@ -44,7 +49,13 @@ export const inlineKeyboards = {
   otherSchedules: Markup.inlineKeyboard([
     [
       Markup.button.callback('Преподаватель', callbackIdBuild('teacher_week')),
-      Markup.button.callback('Группа', callbackIdBuild('group_week'))
+      Markup.button.callback('Группа', callbackIdBuild('group_week')),
+      Markup.button.callback('Аудитории', callbackIdBuild('classroom_schedule'))
+    ]
+  ]),
+  classroomScheduleType: Markup.inlineKeyboard([
+    [
+      Markup.button.callback('Свободные аудитории', callbackIdBuild('classroom_schedule', [ ClassroomScheduleType.Free ]))
     ]
   ])
 }
