@@ -47,7 +47,7 @@ const searchLocationToKeeper = (location: ClassroomLocationSearch): ClassroomLoc
     case ClassroomLocationSearch.OldBuilding:
       return [ ClassroomLocation.OldBuilding ]
     case ClassroomLocationSearch.NewBuilding:
-      return [ ClassroomLocation.OldBuilding ]
+      return [ ClassroomLocation.NewBuilding ]
     case ClassroomLocationSearch.Dormitory:
       return [ ClassroomLocation.Dormitory ]
     case ClassroomLocationSearch.Everywhere:
@@ -70,9 +70,20 @@ const classroomLocationToString = (location: ClassroomLocationSearch) => {
   }
 }
 
+function normalizeClassroomName(name: string): string {
+  if ([ '(чжф)', 'БАЗ' ].some(e => e.includes(name))) return name
+
+  const match = name.match(/^\d+/)
+  return match ? match[0] : name
+}
+
 function filterUnusedClassrooms(classrooms: Classroom[], lessons: Lesson[]): Classroom[] {
-  const usedClassrooms = new Set(lessons.flatMap(lesson => lesson.classrooms))
-  return classrooms.filter(classroom => !usedClassrooms.has(classroom.name))
+  const usedClassrooms = new Set(lessons.flatMap(lesson => lesson.classrooms.map(normalizeClassroomName)))
+  const uniqueClassrooms = [
+    ...new Map(classrooms.map(c => [ normalizeClassroomName(c.name), c ])).values()
+  ]
+
+  return uniqueClassrooms.filter(classroom => !usedClassrooms.has(normalizeClassroomName(classroom.name)))
 }
 
 function setRange(bounds: IDayBounds, range: string): IDayBounds {
@@ -247,6 +258,7 @@ classroomScheduleHandler.action(callbackIdBuild('classroom_schedule', [ Classroo
   const locationSearch = searchLocationToKeeper(classroomLocationCarousel[locationIndex])
   const timeSearch = lessonTimeCarousel[timeIndex]
   const todayBounds = getDayBounds()
+  // const todayBounds = { start: new Date(1739232000000), end: new Date(1739318399999) }?
   setRange(todayBounds, lessonTimeToHuman(timeSearch))
 
   const classrooms = await keeper.getClassrooms({ location: locationSearch, is_computer: onlyComputer })
