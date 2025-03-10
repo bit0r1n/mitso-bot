@@ -2,7 +2,7 @@ import { BaseApi } from '../utils'
 import { courseToIdMap, facultyToIdMap, formToIdMap } from './helpers'
 import { GetGroupsOptions, Group, RawGroup } from './interfaces'
 
-export class Parser extends BaseApi{
+export class Parser extends BaseApi {
   constructor(url: string) {
     super(url)
   }

@@ -1,4 +1,4 @@
-import mitso/[typedefs, helpers]
+import mitso/[ typedefs, helpers ]
 import json, strutils, tables, sequtils, times, uri
 
 proc `%`*(select: SelectOption): JsonNode =
@@ -30,7 +30,6 @@ proc `%`*(day: ScheduleDay): JsonNode =
   result = newJObject()
   result["date"] = %($day.date)
   result["display_date"] = %day.displayDate
-  result["day_of_week"] = %day.day
   result["lessons"] = %day.lessons
 
 proc filterGroups*(groups: seq[Group], query: Table[string, string]): seq[Group] =

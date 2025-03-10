@@ -77,6 +77,5 @@ export interface Lesson {
 export interface Day {
   date: Date
   display_date: string
-  day_of_week: number
   lessons: Lesson[]
 }

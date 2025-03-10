@@ -1,10 +1,10 @@
 import strutils, asyncdispatch, asynchttpserver, json, tables, uri, sequtils, options
-import mitso/[schedule, helpers, typedefs]
+import mitso/[ wrapper, typedefs ]
 import jester
 import helpers, errors
 
 var
-  mitsoParser {.threadvar.}: ScheduleSite
+  mitsoWrapper {.threadvar.}: MitsoWrapper
   fetchedGroups {.threadvar.}: seq[Group]
 
 router parserRouter:
@@ -42,7 +42,7 @@ router parserRouter:
       $(%*{ "result": %group }),
       "application/json; charset=utf-8"
     )
-  get "/groups/@id/weeks":
+  get "/groups/@id/schedule":
     var
       id = decodeUrl(@"id")
       filteredGroups = filterGroups(
@@ -55,44 +55,13 @@ router parserRouter:
 
     var group = filteredGroups[0]
     filteredGroups.setLen(0)
-    let weeks = await mitsoParser.getWeeks(group)
 
+    var schedule = await mitsoWrapper.getSchedule(group)
     resp(
-      Http200,
-      $(%*{ "result": %weeks }),
-      "application/json; charset=utf-8"
-    )
-  get "/groups/@id/weeks/@week":
-    var
-      id = decodeUrl(@"id")
-      filteredGroups = filterGroups(
-        fetchedGroups,
-        toTable(toSeq(decodeQuery(request.query)))
-      ).filterIt(it.id == id)
-
-    if filteredGroups.len == 0:
-      raise newException(GroupNotFound, "Group not found")
-
-    var group = filteredGroups[0]
-    filteredGroups.setLen(0)
-    var weeks = await mitsoParser.getWeeks(group)
-
-    if weeks.filterIt(it.id == @"week").len == 0:
-      weeks.setLen(0)
-      raise newException(WeekNotFound, "Week not found")
-
-    weeks.setLen(0)
-
-    try:
-      let schedule = await mitsoParser.getSchedule(group, @"week")
-
-      resp(
         Http200,
         $(%*{ "result": %schedule }),
         "application/json; charset=utf-8"
       )
-    except:
-      raise newException(FailedToParseWeek, "Failed to parse week")
   error GroupNotFound:
     resp(
       Http404,
@@ -111,12 +80,12 @@ router parserRouter:
       $(%*{ "error": "Failed to parse week" }),
       "application/json; charset=utf-8"
     )
-  error ScheduleServiceError:
-    resp(
-      Http500,
-      $(%*{ "error": "Schedule service returned an unexpected result" }),
-      "application/json; charset=utf-8"
-    )
+  # error ScheduleServiceError:
+  #   resp(
+  #     Http500,
+  #     $(%*{ "error": "Schedule service returned an unexpected result" }),
+  #     "application/json; charset=utf-8"
+  #   )
   error Http404:
     resp(
       Http404,
@@ -125,9 +94,9 @@ router parserRouter:
     )
 
 proc main() {.async.} =
-  mitsoParser = newScheduleSite()
+  mitsoWrapper = newMitsoWrapper()
   echo "Loading groups..."
-  fetchedGroups = await mitsoParser.loadGroups()
+  fetchedGroups = await mitsoWrapper.getAllGroups()
 
   let s = newSettings(
     Port(3000)

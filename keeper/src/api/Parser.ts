@@ -3,13 +3,12 @@ import {
   facultyToRaw,
   formToRaw,
   parseCourse,
-  parseDayOfWeek,
   parseFaculty,
   parseForm,
   parseLessonTime,
   parseLessonType
 } from './helpers'
-import { Course, Day, Faculty, Form, Group, SelectOption } from './interfaces'
+import { Course, Day, Faculty, Form, Group } from './interfaces'
 import { join } from 'path'
 
 export interface ParserApiOptions {
@@ -39,7 +38,6 @@ interface LessonResponse {
 interface DayResponse {
   date: string
   display_date: string
-  day_of_week: string
   lessons: LessonResponse[]
 }
 
@@ -136,44 +134,8 @@ export class Parser {
     }
   }
 
-  async getGroupWeeks(id: string, groupFilter?: GroupFilterOptions): Promise<SelectOption[]> {
-    const url = new URL(join(this.url, 'groups', encodeURIComponent(id), 'weeks'))
-
-    if (groupFilter) {
-      for (const filterKey in groupFilter) {
-        const key = filterKey as keyof GroupFilterOptions
-        let filterValue: string
-
-        switch (key) {
-          case 'course':
-            filterValue = courseToRaw(groupFilter[key]!)
-            break
-          case 'form':
-            filterValue = formToRaw(groupFilter[key]!)
-            break
-          case 'faculty':
-            filterValue = facultyToRaw(groupFilter[key]!)
-            break
-          default:
-            filterValue = groupFilter[key]!
-        }
-        
-        url.searchParams.append(filterKey, filterValue)
-      }
-    }
-
-    const req = await fetch(url)
-    const res = await req.json()
-
-    if (res.result) {
-      return res.result
-    } else {
-      throw new Error(res.error)
-    }
-  }
-
-  async getGroupSchedule(id: string, week: number, groupFilter?: GroupFilterOptions): Promise<Day[]> {
-    const url = new URL(join(this.url, 'groups', encodeURIComponent(id), 'weeks', week.toString()))
+  async getGroupSchedule(id: string, groupFilter?: GroupFilterOptions): Promise<Day[]> {
+    const url = new URL(join(this.url, 'groups', encodeURIComponent(id), 'schedule'))
 
     if (groupFilter) {
       for (const filterKey in groupFilter) {
@@ -206,7 +168,6 @@ export class Parser {
         .map(day => ({
           ...day,
           date: new Date(day.date),
-          day_of_week: parseDayOfWeek(day.day_of_week),
           lessons: day.lessons.map(lesson => ({
             ...lesson,
             date: new Date(lesson.date),

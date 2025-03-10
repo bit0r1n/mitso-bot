@@ -18,55 +18,42 @@ export async function parseLessons() {
   const teacherSet = new Set<string>()
 
   for (const group of groups) {
-    console.debug('Getting weeks for "%s" group [%d/%d]', group.id, ++groupIndex, groups.length)
+    console.debug('Getting schedule for "%s" group [%d/%d]', group.id, ++groupIndex, groups.length)
 
-    const weeks = await parser.getGroupWeeks(group.id, { faculty: group.faculty })
+    let schedule: Day[]
 
-    console.log('Got weeks: [%s]', weeks.map(w => w.display).join(', '))
-
-    if (weeks.length === 0) {
-      console.log('No weeks found, skipping')
+    try {
+      schedule = await parser.getGroupSchedule(group.id, { faculty: group.faculty })
+    } catch {
       continue
     }
 
-    for (const week of weeks) {
-      let schedule: Day[]
+    if (!schedule.length) continue
 
-      try {
-        schedule = await parser.getGroupSchedule(group.id, parseInt(week.id), { faculty: group.faculty })
-      } catch {
-        continue
-      }
+    const lessonsStart = getWeekStart(schedule[0].lessons[0].date)
+    const lessonsEnd = getWeekStart(schedule.at(-1)!.lessons.at(-1)!.date)
+    lessonsEnd.setDate(lessonsEnd.getDate() + 7)
 
-      if (!schedule.length) continue
+    const lessons = schedule.map(day => day.lessons).flat(1)
+    const lessonsDocuments = lessons.map(lesson => new Lesson(lessonToScheme(lesson, group.id)))
 
-      const weekStart = getWeekStart(schedule[0].lessons[0].date)
-      const weekEnd = new Date(weekStart)
-      weekEnd.setDate(weekEnd.getDate() + 7)
-
-      const lessons = schedule.map(day => day.lessons).flat(1)
-      const lessonsDocuments = lessons.map(lesson => new Lesson(lessonToScheme(lesson, group.id)))
-
-      for (const lesson of lessons) {
-        if (lesson.teachers) lesson.teachers.forEach(teacher => teacherSet.add(teacher))
-      }
-
-      lessons.splice(0, lessons.length)
-
-      await Lesson.deleteMany({
-        group: group.id,
-        date: {
-          $gte: weekStart,
-          $lt: weekEnd
-        }
-      })
-
-      await Lesson.insertMany(lessonsDocuments)
-
-      lessonsDocuments.splice(0, lessonsDocuments.length)
+    for (const lesson of lessons) {
+      if (lesson.teachers) lesson.teachers.forEach(teacher => teacherSet.add(teacher))
     }
 
-    weeks.splice(0, weeks.length)
+    lessons.splice(0, lessons.length)
+
+    await Lesson.deleteMany({
+      group: group.id,
+      date: {
+        $gte: lessonsStart,
+        $lt: lessonsEnd
+      }
+    })
+
+    await Lesson.insertMany(lessonsDocuments)
+
+    lessonsDocuments.splice(0, lessonsDocuments.length)
 
     await Bun.sleep(5000)
   }
