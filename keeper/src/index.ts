@@ -1,7 +1,6 @@
 import express from 'express'
 import * as mongoose from 'mongoose'
 import { GetWeeksOptions, Lesson, LessonFilterOptions } from './schemas/Lesson'
-import { Parser } from './api'
 import { Teacher } from './schemas/Teacher'
 import { indexClassrooms, parseLessons } from './cron'
 import { FilterQuery } from 'mongoose'
@@ -79,21 +78,23 @@ app.get('/weeks', async (req, res) => {
     return
   }
 
-  if (group) {
-    try {
-      await new Parser().getGroup(group)
-    } catch (e) {
-      const error = e as Error
-      if (error.message === 'Group not found') {
-        res.status(404).json({ error: error.message })
-        return
-      }
-      res.status(500).json({ error: error.message })
-      return
-    }
-  }
-
   const filter: GetWeeksOptions = {}
+
+  if (group) {
+    // try {
+    //   await new Parser().getGroup(group)
+    // } catch (e) {
+    //   const error = e as Error
+    //   if (error.message === 'Group not found') {
+    //     res.status(404).json({ error: error.message })
+    //     return
+    //   }
+    //   res.status(500).json({ error: error.message })
+    //   return
+    // }
+
+    filter.group = group
+  }
 
   if (from) {
     filter.from = new Date(from)
@@ -101,10 +102,6 @@ app.get('/weeks', async (req, res) => {
 
   if (before) {
     filter.before = new Date(before)
-  }
-
-  if (group) {
-    filter.group = group
   }
 
   if (teachers?.length) {
@@ -136,17 +133,17 @@ app.get('/lessons', async (req, res) => {
   const filter: LessonFilterOptions = {}
 
   if (group) {
-    try {
-      await new Parser().getGroup(group)
-    } catch (e) {
-      const error = e as Error
-      if (error.message === 'Group not found') {
-        res.status(404).json({ error: error.message })
-        return
-      }
-      res.status(500).json({ error: error.message })
-      return
-    }
+    // try {
+    //   await new Parser().getGroup(group)
+    // } catch (e) {
+    //   const error = e as Error
+    //   if (error.message === 'Group not found') {
+    //     res.status(404).json({ error: error.message })
+    //     return
+    //   }
+    //   res.status(500).json({ error: error.message })
+    //   return
+    // }
 
     filter.group = group
   }

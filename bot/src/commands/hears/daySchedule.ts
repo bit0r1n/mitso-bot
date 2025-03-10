@@ -10,7 +10,7 @@ export class DayScheduleCommand extends AbstractHearsCommand {
   async execute(ctx: CommandContext) {
     if (ctx.user.state !== UserState.MainMenu) return
 
-    const { keeper } = this.utils
+    const { keeper, parser } = this.utils
 
     const extraTime = ctx.message.text === 'Завтра' ? 24 * 60 ** 2 * 1e3 : 0
   
@@ -37,7 +37,7 @@ export class DayScheduleCommand extends AbstractHearsCommand {
     }
 
     const groupsList = ctx.user.role === UserRole.Teacher
-      ? (await this.utils.parser.getGroups())
+      ? (await parser.getGroups())
       : undefined
 
     const messagesContent = lessonsToMessage(lessons, groupsList)
