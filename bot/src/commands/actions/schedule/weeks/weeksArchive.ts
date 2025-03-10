@@ -92,7 +92,7 @@ weeksArchiveHandler.action(new RegExp([ '^week', 'archive', '*' ].join(CallbackI
       }
 
       const groupsList = entityType === WeeksArchiveType.Teacher
-        ? (await parser.getGroups())
+        ? await parser.getGroups().catch(() => [])
         : undefined
 
       const messagesContent = lessonsToMessage(lessons, groupsList)

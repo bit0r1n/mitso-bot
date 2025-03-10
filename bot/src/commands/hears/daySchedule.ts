@@ -37,7 +37,7 @@ export class DayScheduleCommand extends AbstractHearsCommand {
     }
 
     const groupsList = ctx.user.role === UserRole.Teacher
-      ? (await parser.getGroups())
+      ? await parser.getGroups().catch(() => [])
       : undefined
 
     const messagesContent = lessonsToMessage(lessons, groupsList)

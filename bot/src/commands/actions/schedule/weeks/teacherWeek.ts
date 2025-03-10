@@ -88,7 +88,7 @@ teacherWeekHandler.action(/^teacher_week*/, async (ctx) => {
 
     await ctx.answerCbQuery()
 
-    const groups = await parser.getGroups()
+    const groups = await parser.getGroups().catch(() => [])
 
     const currentDate = new Date()
     currentDate.setTime(currentDate.getTime() + (3 * 60 ** 2 * 1e3))

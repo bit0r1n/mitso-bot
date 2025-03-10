@@ -55,7 +55,7 @@ selfWeekHandler.action(new RegExp([ '^week', '\\d+', '*' ].join(CallbackIdSplitt
   await ctx.answerCbQuery()
 
   const groupsList = entityType === WeeksArchiveType.Teacher
-    ? (await parser.getGroups())
+    ? await parser.getGroups().catch(() => [])
     : undefined
 
   const messagesContent = lessonsToMessage(lessons, groupsList)
