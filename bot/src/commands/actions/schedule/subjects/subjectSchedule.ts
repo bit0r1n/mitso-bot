@@ -36,7 +36,8 @@ async function getSubjectsPage(ctx: SuperDuperUpgradedContext, page: number) {
   } else if (!isStudent && ctx.user.teacher_name) {
     searchPayload.teacher = ctx.user.teacher_name
   } else {
-    await ctx.reply('🎅 кто')
+    await ctx.editMessageText('🎅 кто')
+    await ctx.editMessageReplyMarkup(Markup.inlineKeyboard([ [] ]).reply_markup)
     return { pages: 0, pageSubjects: [] }
   }
 
@@ -79,15 +80,18 @@ subjectsScheduleHandler.action('subject_schedule', async (ctx) => {
   } else if (!isStudent && ctx.user.teacher_name) {
     payload.teacher = ctx.user.teacher_name
   } else {
-    return await ctx.reply('🎅 кто')
+    await ctx.editMessageReplyMarkup(Markup.inlineKeyboard([ [] ]).reply_markup)
+    return await ctx.editMessageText('🎅 кто')
   }
 
   const subjects = await keeper.getSubjects(payload)
   if (!subjects.length) {
-    return await ctx.reply('🏌️‍♂️ Дисциплин не нашлось, ты кто вообще')
+    await ctx.editMessageReplyMarkup(Markup.inlineKeyboard([ [] ]).reply_markup)
+    return await ctx.editMessageText('🏌️‍♂️ Дисциплин не нашлось, ты кто вообще')
   }
 
   const startPage = await getSubjectsPage(ctx, 0)
+  if (!startPage.pages) return
   const buttons = buildSubjectsInlineKeyboard(ctx, 0, startPage.pages, startPage.pageSubjects)
 
   await ctx.editMessageText('📚 Выбери дисциплину', {
@@ -98,6 +102,7 @@ subjectsScheduleHandler.action('subject_schedule', async (ctx) => {
 subjectsScheduleHandler.action(new RegExp([ '^subject_schedule', 'page', '\\d+$' ].join(CallbackIdSplitter)), async (ctx) => {
   const page = parseInt(ctx.match.input.split(CallbackIdSplitter).pop()!)
   const { pages, pageSubjects } = await getSubjectsPage(ctx, page)
+  if (!pages) return
   const buttons = buildSubjectsInlineKeyboard(ctx, page, pages, pageSubjects)
 
   await ctx.editMessageReplyMarkup(buttons.reply_markup)
