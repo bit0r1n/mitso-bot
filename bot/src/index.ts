@@ -6,7 +6,7 @@ import { Parser } from './parser'
 import { Keeper } from './keeper'
 import { hearsCommands } from './commands/hears'
 import { slashCommands } from './commands/slash'
-import { classroomScheduleMasterHandler, weeksHandler } from './commands/actions/schedule'
+import { classroomScheduleMasterHandler, subjectsScheduleHandler, weeksHandler } from './commands/actions/schedule'
 import { settingsHandler } from './commands/actions/settings'
 import { chatHandler } from './commands/chatHandler'
 
@@ -71,6 +71,7 @@ bot
   .use(classroomScheduleMasterHandler)
   .use(settingsHandler)
   .use(chatHandler)
+  .use(subjectsScheduleHandler)
 
 process.on('uncaughtException', console.error)
 process.on('unhandledRejection', console.error)

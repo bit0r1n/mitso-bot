@@ -1,15 +1,17 @@
 export interface WeeksSearchOptions {
   group?: string
   teachers?: string | string[]
+  subject?: string
   from?: Date
   before?: Date
 }
 
 export interface LessonsSearchOptions {
   group?: string
+  teachers?: string | string[]
+  subject?: string
   from?: Date
   before?: Date
-  teachers?: string | string[]
   classrooms?: string | string[]
 }
 
@@ -75,4 +77,14 @@ export interface ClassroomSearchOptions {
   location?: ClassroomLocation | ClassroomLocation[]
   floor?: number | number[]
   is_computer?: boolean
+}
+
+export interface SubjectSearchOptions {
+  group?: string
+  teacher?: string
+}
+
+export interface SubjectResult {
+  name: string
+  hash: number
 }

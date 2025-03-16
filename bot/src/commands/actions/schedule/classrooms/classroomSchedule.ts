@@ -145,7 +145,7 @@ async function updateFreeSearchMessage(ctx: SuperDuperUpgradedContext) {
         )
       ],
       [
-        Markup.button.callback('<',
+        Markup.button.callback('◀️',
           callbackIdBuild('classroom_schedule', [
             ClassroomScheduleType.Free,
             'time',
@@ -159,7 +159,7 @@ async function updateFreeSearchMessage(ctx: SuperDuperUpgradedContext) {
             'current'
           ])
         ),
-        Markup.button.callback('>',
+        Markup.button.callback('▶️',
           callbackIdBuild('classroom_schedule', [
             ClassroomScheduleType.Free,
             'time',
@@ -258,7 +258,6 @@ classroomScheduleHandler.action(callbackIdBuild('classroom_schedule', [ Classroo
   const locationSearch = searchLocationToKeeper(classroomLocationCarousel[locationIndex])
   const timeSearch = lessonTimeCarousel[timeIndex]
   const todayBounds = getDayBounds()
-  // const todayBounds = { start: new Date(1739232000000), end: new Date(1739318399999) }?
   setRange(todayBounds, lessonTimeToHuman(timeSearch))
 
   const classrooms = await keeper.getClassrooms({ location: locationSearch, is_computer: onlyComputer })

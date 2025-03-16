@@ -5,6 +5,7 @@ import { Teacher } from './schemas/Teacher'
 import { indexClassrooms, parseLessons } from './cron'
 import { FilterQuery } from 'mongoose'
 import { Classroom, IClassroom } from './schemas/Classroom'
+import { hashCode } from './utils'
 
 // //                        d   h&m      s->ms
 // const parseJobCooldown = 24 * 60 ** 2 * 1e3
@@ -61,6 +62,7 @@ app.get('/parse_job', async (req, res) => {
 app.get('/weeks', async (req, res) => {
   const group = req.query.group as string | undefined
   const teachers = req.query.teachers as string | string[] | undefined
+  const subject = req.query.subject as string | undefined
   const from = req.query.from as string | undefined
   const before = req.query.before as string | undefined
   if (!(group || teachers?.length)) {
@@ -108,6 +110,10 @@ app.get('/weeks', async (req, res) => {
     filter.teachers = Array.isArray(teachers) ? teachers : [ teachers ]
   }
 
+  if (subject?.length) {
+    filter.name = subject
+  }
+
   const weeks = await Lesson.getWeeks(filter)
 
   res.json({ result: weeks })
@@ -115,9 +121,10 @@ app.get('/weeks', async (req, res) => {
 
 app.get('/lessons', async (req, res) => {
   const group = req.query.group as string | undefined
+  const teachers = req.query.teachers as string | string[] | undefined
+  const subject = req.query.subject as string | undefined
   const from = req.query.from as string | undefined
   const before = req.query.before as string | undefined
-  const teachers = req.query.teachers as string | string[] | undefined
   const classrooms = req.query.classrooms as string | string[] | undefined
 
   if (from && isNaN(new Date(from).valueOf())) {
@@ -148,12 +155,16 @@ app.get('/lessons', async (req, res) => {
     filter.group = group
   }
 
-  if (from) filter.from = new Date(from)
-  if (before) filter.before = new Date(before)
-
   if (teachers) {
     filter.teachers = Array.isArray(teachers) ? teachers : [ teachers ]
   }
+
+  if (subject) {
+    filter.name = subject
+  }
+
+  if (from) filter.from = new Date(from)
+  if (before) filter.before = new Date(before)
 
   if (classrooms) {
     filter.classrooms = Array.isArray(classrooms) ? classrooms : [ classrooms ]
@@ -200,6 +211,23 @@ app.get('/classrooms', async (req, res) => {
   const classrooms = await Classroom.find(filter)
 
   res.json({ result: classrooms })
+})
+
+app.get('/subjects', async (req, res) => {
+  const group = req.query.group as string | undefined
+  const teacher = req.query.teacher as string | undefined
+
+  const filter: Record<string, any> = {}
+  if (group) filter.group = group
+  if (teacher) filter.teachers = [ teacher ]
+
+  const uniqueNames = await Lesson.distinct<string>('name', filter)
+
+  res.json({
+    result: uniqueNames
+      .map(name => ({ name, hash: hashCode(name) }))
+      .sort((a, b) => b.hash - a.hash)
+  })
 })
 
 process.on('uncaughtException', console.error)

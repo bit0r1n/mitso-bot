@@ -12,6 +12,7 @@ function getWeekStart(date: Date = new Date()) {
 export interface LessonFilterOptions {
   group?: string
   teachers?: string[]
+  name?: string
   classrooms?: string[]
   from?: Date
   before?: Date
@@ -20,6 +21,7 @@ export interface LessonFilterOptions {
 export interface GetWeeksOptions {
   group?: string
   teachers?: string[]
+  name?: string
   from?: Date
   before?: Date
 }
@@ -50,7 +52,7 @@ const lessonSchema = new mongoose.Schema<ILesson, LessonModel>({
 }, {
   statics: {
     async getWeeks(filter: GetWeeksOptions): Promise<Date[]> {
-      const { group, teachers, from, before } = filter
+      const { group, teachers, from, before, name } = filter
       const filterOptions: mongoose.FilterQuery<ILesson> = {}
 
       if (group) {
@@ -61,6 +63,10 @@ const lessonSchema = new mongoose.Schema<ILesson, LessonModel>({
         filterOptions['teachers'] = {
           $all: teachers
         }
+      }
+
+      if (name?.length) {
+        filterOptions['name'] = name
       }
 
       if (from) {
@@ -92,6 +98,20 @@ const lessonSchema = new mongoose.Schema<ILesson, LessonModel>({
         filterOptions.group = filter.group
       }
 
+      if (filter?.teachers) {
+        filterOptions['teachers'] = {
+          $all: filter.teachers.map(s => ({
+            $elemMatch: {
+              $regex: s,
+              $options: 'i'
+            }
+          }))
+        }
+      }
+
+      if (filter?.name) {
+        filterOptions.name = filter.name
+      }
 
 
       if (filter?.from) {
@@ -105,17 +125,6 @@ const lessonSchema = new mongoose.Schema<ILesson, LessonModel>({
         filterOptions['date'] = {
           ...filterOptions['date'],
           $lte: filter.before
-        }
-      }
-
-      if (filter?.teachers) {
-        filterOptions['teachers'] = {
-          $all: filter.teachers.map(s => ({
-            $elemMatch: {
-              $regex: s,
-              $options: 'i'
-            }
-          }))
         }
       }
 

@@ -9,7 +9,8 @@ export enum WeeksArchiveAction {
 
 export enum WeeksArchiveType {
   Group = 'gp',
-  Teacher = 'tc'
+  Teacher = 'tc',
+  Subject = 'sb'
 }
 
 export enum ClassroomScheduleType {
@@ -50,7 +51,10 @@ export const inlineKeyboards = {
     [
       Markup.button.callback('Преподаватель', callbackIdBuild('teacher_week')),
       Markup.button.callback('Группа', callbackIdBuild('group_week')),
-      Markup.button.callback('Аудитории', callbackIdBuild('classroom_schedule'))
+    ],
+    [
+      Markup.button.callback('Аудитории', callbackIdBuild('classroom_schedule')),
+      Markup.button.callback('Дисциплина', callbackIdBuild('subject_schedule')),
     ]
   ]),
   classroomScheduleType: Markup.inlineKeyboard([

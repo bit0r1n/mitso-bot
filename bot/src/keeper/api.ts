@@ -4,6 +4,8 @@ import {
   Lesson,
   LessonsSearchOptions,
   RawLesson,
+  SubjectResult,
+  SubjectSearchOptions,
   TeacherSearchOptions,
   WeeksSearchOptions
 } from './interfaces'
@@ -26,6 +28,10 @@ export class Keeper extends BaseApi {
         .forEach(teacher => query.append('teachers', teacher))
     }
 
+    if (options?.subject) {
+      query.set('subject', options.subject)
+    }
+
     if (options?.from) {
       query.set('from', options.from.toISOString())
     }
@@ -45,17 +51,21 @@ export class Keeper extends BaseApi {
       query.set('group', options.group)
     }
 
+    if (options?.teachers) {
+      (Array.isArray(options.teachers) ? options.teachers : [ options.teachers ])
+        .forEach(teacher => query.append('teachers', teacher))
+    }
+
+    if (options?.subject) {
+      query.set('subject', options.subject)
+    }
+
     if (options?.from) {
       query.set('from', options.from.toISOString())
     }
 
     if (options?.before) {
       query.set('before', options.before.toISOString())
-    }
-  
-    if (options?.teachers) {
-      (Array.isArray(options.teachers) ? options.teachers : [ options.teachers ])
-        .forEach(teacher => query.append('teachers', teacher))
     }
 
     if (options?.classrooms) {
@@ -103,5 +113,19 @@ export class Keeper extends BaseApi {
     }
 
     return await this.request<Classroom[]>('classrooms', query)
+  }
+
+  async getSubjects(options?: SubjectSearchOptions): Promise<SubjectResult[]> {
+    const query = new URLSearchParams()
+
+    if (options?.group) {
+      query.set('group', options.group)
+    }
+
+    if (options?.teacher) {
+      query.set('teacher', options.teacher)
+    }
+
+    return await this.request<SubjectResult[]>('subjects', query)
   }
 }

@@ -10,9 +10,10 @@ import {
   WeeksArchiveType
 } from '../../../../utils'
 import { Composer, Markup } from 'telegraf'
-import { getWeekStart, Keeper, lessonsToMessage, weekToHuman } from '../../../../keeper'
+import { getWeekStart, Keeper, LessonsSearchOptions, lessonsToMessage, WeeksSearchOptions, weekToHuman } from '../../../../keeper'
 import { InlineKeyboardButton } from 'telegraf/types'
 import { Parser } from '../../../../parser'
+import { UserRole } from '../../../../schemas/User'
 
 export const weeksArchiveHandler = new Composer<SuperDuperUpgradedContext>()
 
@@ -24,11 +25,32 @@ weeksArchiveHandler.action(new RegExp([ '^week', 'archive', '*' ].join(CallbackI
   const [ , entityType, entityId, week, action, pageString ] = args
 
   if (!week && !action) {
-    const weeks = await keeper.getWeeks({
-      teachers: entityType === WeeksArchiveType.Teacher ? entityId : undefined,
-      group: entityType === WeeksArchiveType.Group ? entityId : undefined,
+    const weeksPayload: WeeksSearchOptions = {
       before: getWeekStart()
-    })
+    }
+
+    switch (entityType) {
+      case WeeksArchiveType.Group:
+        weeksPayload.group = entityId
+        break
+      case WeeksArchiveType.Teacher:
+        weeksPayload.teachers = entityId
+        break
+      case WeeksArchiveType.Subject: {
+        const subject = (await keeper.getSubjects()).find(s => s.hash === parseInt(entityId))
+        weeksPayload.subject = subject!.name
+
+        const isStudent = ctx.user.role !== UserRole.Teacher
+        if (isStudent && ctx.user.group) {
+          weeksPayload.group = ctx.user.group.id
+        } else if (!isStudent && ctx.user.teacher_name) {
+          weeksPayload.teachers = ctx.user.teacher_name
+        }
+        break
+      }
+    }
+    
+    const weeks = await keeper.getWeeks(weeksPayload)
 
     const batchedWeeks = batchArray(
       weeks.sort((a, b) => b.getTime() - a.getTime()), 9)
@@ -64,12 +86,28 @@ weeksArchiveHandler.action(new RegExp([ '^week', 'archive', '*' ].join(CallbackI
       const weekEnd = new Date(week)
       weekEnd.setTime(weekStart.getTime() + (7 * 24 * 60 ** 2 * 1e3))
 
-      let groupName: string
+      let groupName = ''
 
       try {
-        groupName = entityType === WeeksArchiveType.Teacher
-          ? entityId
-          : (await parser.getGroup(entityId)).display
+        switch (entityType) {
+          case WeeksArchiveType.Group:
+            groupName = (await parser.getGroup(entityId)).display
+            break
+          case WeeksArchiveType.Teacher:
+            groupName = entityId
+            break
+          case WeeksArchiveType.Subject: {
+            const isStudent = ctx.user.role !== UserRole.Teacher
+            if (isStudent && ctx.user.group) {
+              groupName = ctx.user.group.display
+            } else if (!isStudent && ctx.user.teacher_name) {
+              groupName = ctx.user.teacher_name
+            } else {
+              throw new Error('Subject archive no entity name')
+            }
+            break
+          }
+        }
       } catch (e) {
         return await ctx.editMessageText(
           (e as Error).message === 'Group not found'
@@ -78,12 +116,33 @@ weeksArchiveHandler.action(new RegExp([ '^week', 'archive', '*' ].join(CallbackI
         )
       }
 
-      const lessons = await keeper.getLessons({
-        group: entityType === WeeksArchiveType.Group ? entityId : undefined,
-        teachers: entityType === WeeksArchiveType.Teacher ? entityId : undefined,
+      const lessonsPayload: LessonsSearchOptions = {
         from: weekStart,
         before: weekEnd
-      })
+      }
+
+      switch (entityType) {
+        case WeeksArchiveType.Group:
+          lessonsPayload.group = entityId
+          break
+        case WeeksArchiveType.Teacher:
+          lessonsPayload.teachers = entityId
+          break
+        case WeeksArchiveType.Subject: {
+          const subject = (await keeper.getSubjects()).find(s => s.hash === parseInt(entityId))
+          lessonsPayload.subject = subject!.name
+
+          const isStudent = ctx.user.role !== UserRole.Teacher
+          if (isStudent && ctx.user.group) {
+            lessonsPayload.group = ctx.user.group.id
+          } else if (!isStudent && ctx.user.teacher_name) {
+            lessonsPayload.teachers = ctx.user.teacher_name
+          }
+          break
+        }
+      }
+
+      const lessons = await keeper.getLessons(lessonsPayload)
 
       const target = weekToHuman(weekStart, new Date())
 
@@ -91,7 +150,8 @@ weeksArchiveHandler.action(new RegExp([ '^week', 'archive', '*' ].join(CallbackI
         return await ctx.editMessageText(`🤯 Расписания на неделю с ${target} нету`)
       }
 
-      const groupsList = entityType === WeeksArchiveType.Teacher
+      const groupsList = (entityType === WeeksArchiveType.Subject && ctx.user.role === UserRole.Teacher)
+        || entityType === WeeksArchiveType.Teacher
         ? await parser.getGroups().catch(() => [])
         : undefined
 
@@ -116,11 +176,32 @@ weeksArchiveHandler.action(new RegExp([ '^week', 'archive', '*' ].join(CallbackI
     }
     case WeeksArchiveAction.ShowPage: {
       const page = parseInt(pageString)
-      const weeks = await keeper.getWeeks({
-        group: entityType === WeeksArchiveType.Group ? entityId : undefined,
-        teachers: entityType === WeeksArchiveType.Teacher ? entityId : undefined,
+      const weeksPayload: WeeksSearchOptions = {
         before: getWeekStart()
-      })
+      }
+
+      switch (entityType) {
+        case WeeksArchiveType.Group:
+          weeksPayload.group = entityId
+          break
+        case WeeksArchiveType.Teacher:
+          weeksPayload.teachers = entityId
+          break
+        case WeeksArchiveType.Subject: {
+          const subject = (await keeper.getSubjects()).find(s => s.hash === parseInt(entityId))
+          weeksPayload.subject = subject!.name
+
+          const isStudent = ctx.user.role !== UserRole.Teacher
+          if (isStudent && ctx.user.group) {
+            weeksPayload.group = ctx.user.group.id
+          } else if (!isStudent && ctx.user.teacher_name) {
+            weeksPayload.teachers = ctx.user.teacher_name
+          }
+          break
+        }
+      }
+
+      const weeks = await keeper.getWeeks(weeksPayload)
 
       const batchedWeeks = batchArray(
         weeks.sort((a, b) => b.getTime() - a.getTime()), 9)

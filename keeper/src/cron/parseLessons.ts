@@ -55,7 +55,7 @@ export async function parseLessons() {
 
     lessonsDocuments.splice(0, lessonsDocuments.length)
 
-    await Bun.sleep(5000)
+    await Bun.sleep(2500)
   }
 
   groups.splice(0, groups.length)
