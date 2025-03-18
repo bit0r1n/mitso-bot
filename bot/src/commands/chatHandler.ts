@@ -2,7 +2,7 @@ import { Composer, Markup } from 'telegraf'
 import { batchButtons, callbackIdBuild, inlineKeyboards, replyKeyboards, SuperDuperUpgradedContext } from '../utils'
 import { message } from 'telegraf/filters'
 import { UserRole, UserState } from '../schemas/User'
-import { Parser } from '../parser'
+import { Group, Parser } from '../parser'
 import { Keeper } from '../keeper'
 
 export const chatHandler = new Composer<SuperDuperUpgradedContext>()
@@ -23,7 +23,18 @@ chatHandler.on(message('text'), async (ctx) => {
       return await ctx.reply('😨 Давай конкретнее, слишком маленький запрос')
     }
 
-    const groups = await parser.getGroups({ display: ctx.message.text })
+    let groups: Group[] = []
+
+    try {
+      groups = await parser.getGroups({ display: ctx.message.text })
+    } catch {
+      ctx.user.state = UserState.MainMenu
+      await ctx.user.save()
+
+      return await ctx.reply('😔 Поиск групп сейчас недоступен. Попробуй повторить позже', {
+        reply_markup: replyKeyboards[ctx.user.state].resize().reply_markup
+      })
+    }
 
     if (!groups.length) {
       return await ctx.reply('🥺 Такой группы не нашлось. Попробуй другой номер группы')
@@ -78,7 +89,13 @@ chatHandler.on(message('text'), async (ctx) => {
 
     const isStudent = ctx.user.role !== UserRole.Teacher
     if (isStudent) {
-      const groups = await parser.getGroups({ display: ctx.message.text })
+      let groups: Group[] = []
+
+      try {
+        groups = await parser.getGroups({ display: ctx.message.text }) 
+      } catch {
+        return await ctx.reply('🏌️‍♂️ ГООООООЛ выбор группы пока недоступен, напиши свою группу чуть позже')
+      }
 
       if (!groups.length) {
         return await ctx.reply('🩼 Таких групп я не видал. Попробуй другой номер')
