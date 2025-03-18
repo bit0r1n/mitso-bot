@@ -122,7 +122,7 @@ async function updateFreeSearchMessage(ctx: SuperDuperUpgradedContext) {
   await ctx.editMessageText('🥂 Выбери где и к скольки ты хочешь увидеть свободные на сегодня аудитории', {
     reply_markup: Markup.inlineKeyboard([
       [
-        Markup.button.callback('<',
+        Markup.button.callback('◀️',
           callbackIdBuild('classroom_schedule', [
             ClassroomScheduleType.Free,
             'type',
@@ -136,7 +136,7 @@ async function updateFreeSearchMessage(ctx: SuperDuperUpgradedContext) {
             'current'
           ])
         ),
-        Markup.button.callback('>',
+        Markup.button.callback('▶️',
           callbackIdBuild('classroom_schedule', [
             ClassroomScheduleType.Free,
             'type',
