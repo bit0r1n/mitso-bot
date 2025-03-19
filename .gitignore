@@ -4,5 +4,6 @@
 data
 act
 .idea
+.DS_Store
 
 docker-compose.prod.yml
