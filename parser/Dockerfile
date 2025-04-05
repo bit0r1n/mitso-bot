@@ -1,4 +1,4 @@
-FROM nimlang/nim:2.0.8-alpine
+FROM nimlang/nim:2.2.2
 
 RUN apk update
 RUN apk add --no-cache \
