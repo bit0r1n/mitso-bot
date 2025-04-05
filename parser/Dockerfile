@@ -1,9 +1,6 @@
 FROM nimlang/nim:2.2.2
 
-RUN apk update
-RUN apk add --no-cache \
-  pcre-dev \
-  curl
+RUN apt-get update && apt-get install -y curl libpcre3 libpcre3-dev
 
 WORKDIR /app
 COPY . .
