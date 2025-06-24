@@ -2,10 +2,10 @@ name: Deploy
 
 on:
   workflow_dispatch:
-  workflow_run:
-    workflows: [ "Build and Publish" ]
-    types:
-      - completed
+  # workflow_run:
+  #   workflows: [ "Build and Publish" ]
+  #   types:
+  #     - completed
 
 jobs:
   deploy:
