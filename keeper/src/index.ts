@@ -234,6 +234,6 @@ process.on('uncaughtException', console.error)
 
 process.on('unhandledRejection', console.error)
 
-app.listen(3000, '0.0.0.0', () => {
+app.listen(Number(process.env.PORT) || 3000, '0.0.0.0', () => {
   console.log('Server started on port 3000')
 })

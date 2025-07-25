@@ -1,4 +1,4 @@
-import strutils, asyncdispatch, asynchttpserver, json, tables, uri, sequtils, options
+import strutils, asyncdispatch, asynchttpserver, json, tables, uri, sequtils, options, os
 import mitso/[ wrapper, typedefs ]
 import jester
 import helpers, errors
@@ -99,7 +99,7 @@ proc main() {.async.} =
   fetchedGroups = await mitsoWrapper.getAllGroups()
 
   let s = newSettings(
-    Port(3000)
+    Port(parseInt(getEnv("PORT", "3000")))
   )
 
   var jest = initJester(parserRouter, s)

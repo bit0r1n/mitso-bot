@@ -1,7 +1,0 @@
-switch("threads", "on")
-switch("d", "ssl")
-switch("d", "release")
-switch("opt", "speed")
-switch("mm", "orc")
-switch("d", "useStdLib")
-switch("d", "ThreadPoolSize=4")
