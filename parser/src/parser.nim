@@ -6,6 +6,7 @@ import helpers, errors
 var
   mitsoWrapper {.threadvar.}: MitsoWrapper
   fetchedGroups {.threadvar.}: seq[Group]
+  indexingGroups {.threadvar.}: bool
 
 router parserRouter:
   get "/":
@@ -24,6 +25,21 @@ router parserRouter:
       $(%*{ "result": %groups }),
       "application/json; charset=utf-8"
     )
+  get "/groups/reindex":
+    if indexingGroups:
+      raise newException(IndexingGroupsConflict, "Indexing groups process is already running")
+    try:
+      indexingGroups = true
+      fetchedGroups = await mitsoWrapper.getAllGroups()
+      resp(Http204)
+    except:
+      resp(
+        Http500,
+        $(%*{ "error": "Failed to reindex groups" }),
+        "application/json; charset=utf-8"
+      )
+    finally:
+      indexingGroups = false
   get "/groups/@id":
     var
       id = decodeUrl(@"id")
@@ -58,10 +74,10 @@ router parserRouter:
 
     var schedule = await mitsoWrapper.getSchedule(group)
     resp(
-        Http200,
-        $(%*{ "result": %schedule }),
-        "application/json; charset=utf-8"
-      )
+      Http200,
+      $(%*{ "result": %schedule }),
+      "application/json; charset=utf-8"
+    )
   error GroupNotFound:
     resp(
       Http404,
@@ -80,12 +96,18 @@ router parserRouter:
       $(%*{ "error": "Failed to parse week" }),
       "application/json; charset=utf-8"
     )
-  # error ScheduleServiceError:
-  #   resp(
-  #     Http500,
-  #     $(%*{ "error": "Schedule service returned an unexpected result" }),
-  #     "application/json; charset=utf-8"
-  #   )
+  error IndexingGroupsConflict:
+    resp(
+      Http409,
+      $(%*{ "error": "Indexing groups process is already running" }),
+      "application/json; charset=utf-8"
+    )
+  error ScheduleServiceError:
+    resp(
+      Http500,
+      $(%*{ "error": "Schedule service returned an unexpected result" }),
+      "application/json; charset=utf-8"
+    )
   error Http404:
     resp(
       Http404,
@@ -95,6 +117,7 @@ router parserRouter:
 
 proc main() {.async.} =
   mitsoWrapper = newMitsoWrapper()
+  indexingGroups = false
   echo "Loading groups..."
   fetchedGroups = await mitsoWrapper.getAllGroups()
 
