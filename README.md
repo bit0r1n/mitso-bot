@@ -1,6 +1,8 @@
 # MITSO Schedule Bot
 Бот для получения расписания мит со в тг... (а конкретнее [@mitsoScheldueBot](https://t.me/mitsoScheldueBot))
 
+Реализация работы с API расписания находится в [отдельном пакете](https://github.com/bit0r1n/mitso-parser)
+
 Вот кому-то делать нечего, вот и делает этих ваших ботов
 
 ### Запуск
