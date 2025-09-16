@@ -13,4 +13,4 @@ binDir        = "bin"
 
 requires "nim >= 2.0.0"
 requires "jester"
-requires "https://github.com/bit0r1n/mitso == 0.3.5"
+requires "https://github.com/bit0r1n/mitso-parser == 0.3.5"
