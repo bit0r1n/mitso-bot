@@ -2,4 +2,4 @@
 0 */2 * * * /usr/bin/curl http://keeper:3000/parse_job
 
 # Полночь каждую неделю - обновление списка групп
-0 0 1,7,14,21,28 * * /usr/bin/curl http://parser:3000/groups/reindex
+0 1 1,7,14,21,28 * * /usr/bin/curl http://parser:3000/groups/reindex
