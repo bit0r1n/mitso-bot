@@ -4,7 +4,6 @@ import jester
 import helpers, errors
 
 var
-  mitsoWrapper {.threadvar.}: MitsoWrapper
   fetchedGroups {.threadvar.}: seq[Group]
   indexingGroups {.threadvar.}: bool
 
@@ -30,7 +29,7 @@ router parserRouter:
       raise newException(IndexingGroupsConflict, "Indexing groups process is already running")
     try:
       indexingGroups = true
-      fetchedGroups = await mitsoWrapper.getAllGroups()
+      fetchedGroups = await getAllGroups()
       resp(Http204)
     except:
       resp(
@@ -72,7 +71,7 @@ router parserRouter:
     var group = filteredGroups[0]
     filteredGroups.setLen(0)
 
-    var schedule = await mitsoWrapper.getSchedule(group)
+    var schedule = await getSchedule(group)
     resp(
       Http200,
       $(%*{ "result": %schedule }),
@@ -116,10 +115,9 @@ router parserRouter:
     )
 
 proc main() {.async.} =
-  mitsoWrapper = newMitsoWrapper()
   indexingGroups = false
   echo "Loading groups..."
-  fetchedGroups = await mitsoWrapper.getAllGroups()
+  fetchedGroups = await getAllGroups()
 
   let s = newSettings(
     Port(parseInt(getEnv("PORT", "3000")))
